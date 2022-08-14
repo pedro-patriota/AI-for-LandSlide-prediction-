@@ -142,7 +142,7 @@ try:
 
     df = df[df.rain_hour != '']
     df = pd.concat([df, actual_df])
-    df.to_csv(r'C:\Users\parae\Documents\barreiras_prev\processing\ground_type\rain_elevation.csv',
+    df.to_csv(r'C:\Users\parae\Documents\barreiras\barreiras\processing\ground_type\rain_elevation.csv',
                 index=False, header=True)
 
 
@@ -150,7 +150,7 @@ try:
 except:
     df = df[df.rain_hour != '']
     df = pd.concat([df, actual_df])
-    df.to_csv(r'C:\Users\parae\Documents\barreiras_prev\processing\ground_type\rain_elevation.csv',
+    df.to_csv(r'C:\Users\parae\Documents\barreiras\barreiras\processing\ground_type\rain_elevation.csv',
                 index=False, header=True)
 
 
