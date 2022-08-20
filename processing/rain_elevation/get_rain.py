@@ -65,7 +65,7 @@ while(True):
     print(total)
 
 
-    df = df[:1]
+    df = df[:5]
 
     counters = 0
     try:
