@@ -20,6 +20,12 @@ def get_elevation(lat, long):
     # one approach is to use pandas json functionality:
     elevation = pd.json_normalize(r, 'results')['elevation'].values[0]
     return elevation
+def isfloat(num):
+    try:
+        float(num)
+        return True
+    except ValueError:
+        return False
 
 def get_rain_inmep(date, hour):
     try:
@@ -64,7 +70,7 @@ while(True):
     total = len(df)
     print(total)
 
-
+    df = df.sample(frac=1)
     df = df[:5]
 
     counters = 0
@@ -105,14 +111,14 @@ while(True):
 
             data = 'blank'
             print(start, rain, last_rain)
-            if (rain == None or last_rain == None ):
+            if ( rain == None):
                 print('inmep falhou')
                 data = Hourly(location, start, end) # pega a chuva das ultimas 1 hora
                 data = data.fetch()
                 rain = data.iat[hour_total, data.columns.get_loc('prcp')]
                 rain_day = round(float(sum(data['prcp'])), 2)
-
-                if (rain == None):
+                print(rain)
+                if (not isfloat (rain)):
                     print('inmep falhou 2')
                     data = Hourly(id, start, end)
                     data = data.fetch()
@@ -122,17 +128,16 @@ while(True):
                     if (rain == None):
                         rain = -1
             else:
-                try:
-                    rain_day = 0
-                    for i in range(24):
-                        rain_day += get_rain_inmep(start_str, i)
-                    rain_day = round(rain_day)
-                except:
-                    rain_day = -1            
+             
+                rain_day = 0
+                for i in range(24):
+                    rain_day += get_rain_inmep(start_str, i)
+                rain_day = round(rain_day)
+                       
 
             
             #tm.sleep(0.5)
-            if (rain != nan and rain_day != nan):
+            if (isfloat(rain) and isfloat(rain_day)):
                 df.iat[counters, df.columns.get_loc('rain_hour')] = rain
                 df.iat[counters, df.columns.get_loc('rain_day')] = rain_day
                 df.iat[counters, df.columns.get_loc('altitude')] = get_elevation(lat, lon)
