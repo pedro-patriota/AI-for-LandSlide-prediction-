@@ -118,6 +118,7 @@ while(True):
                 rain = data.iat[hour_total, data.columns.get_loc('prcp')]
                 rain_day = round(float(sum(data['prcp'])), 2)
                 print(rain)
+
                 if (not isfloat (rain)):
                     print('inmep falhou 2')
                     data = Hourly(id, start, end)
@@ -128,11 +129,17 @@ while(True):
                     if (rain == None):
                         rain = -1
             else:
-             
+                
                 rain_day = 0
-                for i in range(24):
-                    rain_day += get_rain_inmep(start_str, i)
-                rain_day = round(rain_day)
+                try:
+                    for i in range(24):
+                        rain_day += get_rain_inmep(start_str, i)
+                    rain_day = round(rain_day)
+                except:
+                    data = Hourly(id, start, end)
+                    data = data.fetch()
+                    rain = data.iat[hour_total, data.columns.get_loc('prcp')]
+                    rain_day = round(float(sum(data['prcp'])), 2)
                        
 
             
@@ -152,7 +159,8 @@ while(True):
 
 
         print(df.info())
-    except:
+    except Exception as e:
+        print(repr(e))
         df = df[df.rain_hour != '']
         df = pd.concat([df, actual_df])
         df.to_csv(r'C:\Users\parae\Documents\barreiras\barreiras\processing\ground_type\rain_elevation.csv',
