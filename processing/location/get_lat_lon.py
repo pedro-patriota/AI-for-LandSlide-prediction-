@@ -1,13 +1,14 @@
-from types import NoneType
-import pandas as pd
-from geopy.geocoders import Nominatim
-import geopy.distance
-import unicodedata
 from difflib import SequenceMatcher
-import requests
 
-df = pd.read_csv("processing/location/merged.csv")
-actual_df = pd.read_csv("processing/rain_elevation/location.csv")
+import geopy.distance
+import pandas as pd
+import requests
+import unicodedata
+from geopy.geocoders import Nominatim
+
+df = pd.read_csv("merged.csv")
+actual_df = pd.read_csv("../rain_elevation/location.csv")
+
 
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
@@ -26,9 +27,9 @@ def get_local(address):
         location = requests.get(url=url)
         location = location.json()
         app = Nominatim(user_agent="test")
-        location = app.geocode(address).raw  
+        location = app.geocode(address).raw
 
-        return(location['lat'], location['lon'])
+        return (location['lat'], location['lon'])
 
     except:
         return None
@@ -46,7 +47,7 @@ def get_area(address):
         side1 = getDistance(lat1, lon1, lat1, lon2)
         side2 = getDistance(lat1, lon2, lat2, lon2)
 
-        area = side1*side2
+        area = side1 * side2
 
         return area
     except:
@@ -57,7 +58,7 @@ def check_city(lat, lon):
     lat = str(lat)
     lon = str(lon)
     app2 = Nominatim(user_agent="test")
-    location = app2.reverse(lat+","+lon)
+    location = app2.reverse(lat + "," + lon)
     address = location.raw['address']
     city = address.get('city', '')
 
@@ -68,11 +69,10 @@ def check_city(lat, lon):
 
 
 def check_suburb(lat, lon, input_suburb, input_suburb2):
-
     lat = str(lat)
     lon = str(lon)
     app2 = Nominatim(user_agent="test")
-    location = app2.reverse(lat+","+lon)
+    location = app2.reverse(lat + "," + lon)
     address = location.raw['address']
     city = address.get('city', '')
     suburb = address.get('suburb', '')
@@ -109,18 +109,15 @@ def check_suburb(lat, lon, input_suburb, input_suburb2):
             return False
 
 
-
 df['latitude'] = ''
 df['longitude'] = ''
 df['cond'] = ''
 
-
 df['processo_numero'] = df['processo_numero'].astype(str)
 actual_df['processo_numero'] = actual_df['processo_numero'].astype(str)
-df['cond']= df['processo_numero'].isin(actual_df['processo_numero'])
+df['cond'] = df['processo_numero'].isin(actual_df['processo_numero'])
 
 df = df[df.cond != True]
-
 
 df = df[df.confirmado != 2]
 
@@ -137,7 +134,7 @@ try:
     for counter, bairro in enumerate(df['solicitacao_bairro']):
 
         print("!!!", counter, "!!!")
-        print("---", achou*100/(counter+1),"%---")
+        print("---", achou * 100 / (counter + 1), "%---")
         bairro = str(bairro)
         bairro = bairro.replace("CGO. ", "CÓRREGO ")
         bairro = bairro.replace("JD. ", "CÓRREGO ")
@@ -318,7 +315,7 @@ try:
     df = df[df.em_recife != 0]
     df = pd.concat([df, actual_df])
 
-    print(f"----", {achou/total*100}, "%-----")
+    print(f"----", {achou / total * 100}, "%-----")
     df.to_csv(r'C:\Users\parae\Documents\barreiras_prev\processing\rain_elevation\location.csv',
               index=False, header=True)
 
@@ -342,6 +339,6 @@ except:
 
     df = df[df.em_recife != 0]
     df = pd.concat([df, actual_df])
-    print(f"----", {achou/total*100}, "%-----")
+    print(f"----", {achou / total * 100}, "%-----")
     df.to_csv(r'C:\Users\parae\Documents\barreiras_prev\processing\rain_elevation\location.csv',
               index=False, header=True)
