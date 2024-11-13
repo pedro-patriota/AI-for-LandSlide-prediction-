@@ -51,6 +51,7 @@ class ValuesConstants:
     """
 
     DESLIZAMENTOS_DE_BARREIRAS = 'Deslizamentos de Barreiras'
+    IMOVEIS_COM_DANOS = 'Imoveis com Danos/Risco'
     NAO_HA_OCORRENCIAS = 'Não há Ocorrência para essa Solicitação'
     TESTES = 'testes'
 
