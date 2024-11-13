@@ -75,6 +75,13 @@ class GetLatitudeLongitude:
         return latitude_longitude
 
     @staticmethod
+    def get_outer_merge(df1: DataFrame, df2: DataFrame):
+        df_concatenated = concat([df1, df2])
+
+        df_unique = df_concatenated.drop_duplicates(subset=[DataFrameConstants.PROCESSO_NUMERO], keep=False)
+        return df_unique[df_unique.index.isin(df1.index)]
+
+    @staticmethod
     def get_latitude_longitude(
             df_merged: DataFrame,
             df_found_locations: DataFrame,
@@ -83,8 +90,8 @@ class GetLatitudeLongitude:
     ):
         # df_merged is already sorted based on the is_confirmed column
 
-        df_outer_bad = merge(df_merged, df_bad_locations, how='outer', on=[DataFrameConstants.PROCESSO_NUMERO])
-        df_outer_found = merge(df_outer_bad, df_found_locations, how='outer', on=[DataFrameConstants.PROCESSO_NUMERO])
+        df_outer_bad = GetLatitudeLongitude.get_outer_merge(df_merged, df_bad_locations)
+        df_outer_found = GetLatitudeLongitude.get_outer_merge(df_outer_bad, df_found_locations)
 
         print(f'There are {len(df_outer_found)} occurrences not processed')
         print(f'Reading batch of size {batch_size}')
