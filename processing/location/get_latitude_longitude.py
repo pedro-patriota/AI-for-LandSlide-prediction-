@@ -1,4 +1,4 @@
-from pandas import DataFrame, merge, Series, read_csv
+from pandas import DataFrame, merge, Series, read_csv, concat
 
 from base.pandas_constants import DataFrameConstants, ProcessingConstants, PathConstants, FilesConstants
 from get_latitude_longitude_helper import GetLatitudeLongitudeHelper
@@ -30,7 +30,7 @@ class GetLatitudeLongitude:
         return (latitude, longitude) if found else (None, None)
 
     @staticmethod
-    def get_latitude_longitude_from_occurrence(occurrence: Series):
+    def get_latitude_longitude_from_occurrence(occurrence: Series, found_dict: dict):
         neighborhood = occurrence[DataFrameConstants.SOLICITACAO_BAIRRO]
         street = occurrence[DataFrameConstants.SOLICITACAO_ENDERECO]
         locality = occurrence[DataFrameConstants.SOLICITACAO_LOCALIDADE]
@@ -56,13 +56,20 @@ class GetLatitudeLongitude:
                 locality
             )
 
-        if latitude_longitude == (None, None):
-            latitude_longitude = GetLatitudeLongitude.find_and_assert_latitude_longitude(
-                street_recife,
-                neighborhood,
-                locality
-            )
+            if latitude_longitude == (None, None):
+                latitude_longitude = GetLatitudeLongitude.find_and_assert_latitude_longitude(
+                    street_recife,
+                    neighborhood,
+                    locality
+                )
+                if latitude_longitude != (None, None):
+                    found_dict['street_recife'] += 1
+            else:
+                found_dict['street_locality'] += 1
         else:
+            found_dict['street_neighborhood'] += 1
+
+        if latitude_longitude != (None, None):
             print(f'Found latitude and longitude of occurrence {occurrence[DataFrameConstants.PROCESSO_NUMERO]}')
 
         return latitude_longitude
@@ -86,8 +93,15 @@ class GetLatitudeLongitude:
         df_outer_found[DataFrameConstants.LATITUDE] = ProcessingConstants.UNKNOWN_COORDINATES
         df_outer_found[DataFrameConstants.LONGITUDE] = ProcessingConstants.UNKNOWN_COORDINATES
 
+        found_dict = {
+            'street_neighborhood': 0,
+            'street_locality': 0,
+            'street_recife': 0
+        }
+
         for index, occurrence in df_outer_found.iterrows():
-            latitude, longitude = GetLatitudeLongitude.get_latitude_longitude_from_occurrence(occurrence)
+            latitude, longitude = GetLatitudeLongitude.get_latitude_longitude_from_occurrence(occurrence, found_dict)
+            print(found_dict)
 
             df_outer_found.loc[index, DataFrameConstants.LATITUDE] = latitude
             df_outer_found.loc[index, DataFrameConstants.LONGITUDE] = longitude
@@ -95,13 +109,16 @@ class GetLatitudeLongitude:
         df_bad_rows = df_outer_found[
             df_outer_found[DataFrameConstants.LATITUDE].isna() | df_outer_found[DataFrameConstants.LONGITUDE].isna()
             ]
-        df_good_rows = df_outer_found[~df_bad_rows]
+        df_good_rows = df_outer_found[
+            df_outer_found[DataFrameConstants.LATITUDE].notna() & df_outer_found[DataFrameConstants.LONGITUDE].notna()
+            ]
 
-        df_bad_locations = df_bad_locations.append(df_bad_rows, ignore_index=True)
-        df_found_locations = df_found_locations.append(df_good_rows, ignore_index=True)
+        df_bad_locations = concat([df_bad_locations, df_bad_rows], ignore_index=True)
+        df_found_locations = concat([df_found_locations, df_good_rows], ignore_index=True)
 
         df_bad_locations.to_csv(PathConstants.BAD_LOCATIONS_PATH, index=False, header=True)
-        df_found_locations.to_csv(PathConstants.MERGED_PATH, index=False, header=True)
+        df_found_locations.to_csv(PathConstants.FOUND_LOCATIONS, index=False, header=True)
+
 
 def safe_read_csv(path: str, columns: list[str]) -> DataFrame:
     df = DataFrame(columns=columns)
@@ -111,9 +128,10 @@ def safe_read_csv(path: str, columns: list[str]) -> DataFrame:
         print(f'File not found: {path}, creating new file...')
     return df
 
+
 if __name__ == '__main__':
     df_merged = read_csv(FilesConstants.MERGED)
     df_found_locations = safe_read_csv(FilesConstants.FOUND_LOCATIONS, df_merged.columns.to_list())
     df_bad_locations = safe_read_csv(FilesConstants.BAD_LOCATIONS, df_merged.columns.to_list())
 
-    GetLatitudeLongitude.get_latitude_longitude(df_merged, df_found_locations, df_bad_locations)
+    GetLatitudeLongitude.get_latitude_longitude(df_merged, df_found_locations, df_bad_locations, 10)

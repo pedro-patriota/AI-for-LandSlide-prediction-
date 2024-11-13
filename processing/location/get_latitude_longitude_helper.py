@@ -37,7 +37,7 @@ class GetLatitudeLongitudeHelper:
         address = address.replace("º", " ")
         address = address.replace(" N ", " ")
 
-        return address
+        return address.title()
 
     @staticmethod
     def get_latitude_longitude(address: str) -> Union[Tuple[float, float], Tuple[None, None]]:
@@ -45,8 +45,7 @@ class GetLatitudeLongitudeHelper:
             app = Nominatim(user_agent="test")
             location = app.geocode(address).raw
 
-            print(location['lat'], location['lon'])
-            return (location['lat'], location['lon'])
+            return float(location['lat']), float(location['lon'])
 
         except Exception:
             return None, None

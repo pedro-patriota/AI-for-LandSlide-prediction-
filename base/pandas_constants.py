@@ -42,7 +42,7 @@ class ProcessingConstants:
     MAYBE_CONFIRMED = 1
     NOT_CONFIRMED = 0
     UNKNOWN_COORDINATES = 0.0
-    RECIFE = 'RECIFE'
+    RECIFE = 'Recife'
 
 
 class ValuesConstants:

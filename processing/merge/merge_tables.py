@@ -35,6 +35,7 @@ class MergeTables:
     @staticmethod
     def merge_tables(df_occurrences: DataFrame, df_types: DataFrame) -> None:
         df_merged = merge(df_occurrences, df_types)
+        df_merged = df_merged.drop_duplicates(subset=[DataFrameConstants.PROCESSO_NUMERO])
         df_filtered = MergeTables.filter_confirmed_occurrences(df_merged)
         df_filtered.to_csv(PathConstants.MERGED_PATH, index=False, header=True)
 
