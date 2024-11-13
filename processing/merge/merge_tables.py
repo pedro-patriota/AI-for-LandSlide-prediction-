@@ -36,7 +36,7 @@ class MergeTables:
     def merge_tables(df_occurrences: DataFrame, df_types: DataFrame) -> None:
         df_merged = merge(df_occurrences, df_types)
         df_filtered = MergeTables.filter_confirmed_occurrences(df_merged)
-        df_filtered.to_csv(PathConstants.LOCATION_MERGED, index=False, header=True)
+        df_filtered.to_csv(PathConstants.MERGED_PATH, index=False, header=True)
 
 
 if __name__ == '__main__':
