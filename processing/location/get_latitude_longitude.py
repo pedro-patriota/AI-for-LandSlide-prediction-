@@ -137,8 +137,9 @@ def safe_read_csv(path: str, columns: list[str]) -> DataFrame:
 
 
 if __name__ == '__main__':
-    df_merged = read_csv(FilesConstants.MERGED)
-    df_found_locations = safe_read_csv(FilesConstants.FOUND_LOCATIONS, df_merged.columns.to_list())
-    df_bad_locations = safe_read_csv(FilesConstants.BAD_LOCATIONS, df_merged.columns.to_list())
+    for i in range(100):
+        df_merged = read_csv(FilesConstants.MERGED)
+        df_found_locations = safe_read_csv(FilesConstants.FOUND_LOCATIONS, df_merged.columns.to_list())
+        df_bad_locations = safe_read_csv(FilesConstants.BAD_LOCATIONS, df_merged.columns.to_list())
 
-    GetLatitudeLongitude.get_latitude_longitude(df_merged, df_found_locations, df_bad_locations, 10)
+        GetLatitudeLongitude.get_latitude_longitude(df_merged, df_found_locations, df_bad_locations, 10)
