@@ -1,6 +1,5 @@
 import time
 from typing import Tuple, List, Optional
-from xmlrpc.client import Error
 
 from pandas import DataFrame, Series, read_csv, concat
 
@@ -149,6 +148,6 @@ if __name__ == '__main__':
             GetLatitudeLongitude.get_latitude_longitude(df_merged, df_found_locations, df_bad_locations, 10)
             print("Finished reading batch")
         except Exception as error:
-            print(Error)
-            print("Trying once more...")
-            time.sleep(10)
+            print(error.__str__())
+            print("Applying 10 minutes delay and trying once more...")
+            time.sleep(60 * 10)
