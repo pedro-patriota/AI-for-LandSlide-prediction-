@@ -17,13 +17,14 @@ class DataFrameConstants:
     """
     IS_CONFIRMED = 'is_confirmed'
     LATITUDE = 'latitude'
+    LOCATION_STRATEGY = 'location_strategy'
     LONGITUDE = 'longitude'
-    PROCESSO_OCORRENCIA = 'processo_ocorrencia'
     PROCESSO_NUMERO = 'processo_numero'
+    PROCESSO_OCORRENCIA = 'processo_ocorrencia'
     SOLICITACAO_BAIRRO = 'solicitacao_bairro'
-    SOLICITACAO_LOCALIDADE = 'solicitacao_localidade'
-    SOLICITACAO_ENDERECO = 'solicitacao_endereco'
     SOLICITACAO_DESCRICAO = 'solicitacao_descricao'
+    SOLICITACAO_ENDERECO = 'solicitacao_endereco'
+    SOLICITACAO_LOCALIDADE = 'solicitacao_localidade'
 
 class LocationConstants:
     """

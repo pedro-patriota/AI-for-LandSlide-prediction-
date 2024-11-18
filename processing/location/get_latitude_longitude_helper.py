@@ -1,8 +1,7 @@
 from difflib import SequenceMatcher
-from typing import Union, Tuple
+from typing import Union, Tuple, Optional
 
 import geopy.distance
-import requests
 import unicodedata
 from geopy.geocoders import Nominatim
 from geopy.location import Location
@@ -11,79 +10,81 @@ from base.pandas_constants import LocationConstants, ProcessingConstants
 
 
 class GetLatitudeLongitudeHelper:
-    def __init__(self, lat_lon_file):
+    """
+    Helper class for get latitude and longitude
+    """
+
+    def __init__(self, lat_lon_file: str):
         self.lat_lon_file = lat_lon_file
 
     @staticmethod
-    def similar(a, b):
+    def similar(a: str, b: str) -> float:
+        """Calculate similarity between two strings."""
         return SequenceMatcher(None, a, b).ratio()
 
     @staticmethod
-    def getDistance(lat1, lon1, lat2, lon2):  # get the distance between two points
+    def calculate_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+        """Calculate the geodesic distance between two points."""
         coord1 = (lat1, lon1)
         coord2 = (lat2, lon2)
-
         return geopy.distance.geodesic(coord1, coord2).km
 
     @staticmethod
     def normalize_address(address: str) -> str:
-        address = address.replace("CGO. ", "CÓRREGO ")
-        address = address.replace("JD. ", "CÓRREGO ")
-        address = address.replace("TRV ", "TRAVESSA ")
-        address = address.replace("EST ", "ESTRADA")
-        address = address.replace("AV ", "AVENIDA ")
-        address = address.replace(",", " ")
-        address = address.replace(".", " ")
-        address = address.replace("º", " ")
-        address = address.replace(" N ", " ")
-
+        """Normalize the address to a standard format."""
+        replacements = {
+            "CGO. ": "CÓRREGO ",
+            "JD. ": "CÓRREGO ",
+            "TRV ": "TRAVESSA ",
+            "EST ": "ESTRADA",
+            "AV ": "AVENIDA ",
+            ",": " ",
+            ".": " ",
+            "º": " ",
+            " N ": " "
+        }
+        for old, new in replacements.items():
+            address = address.replace(old, new)
         return address.title()
 
     @staticmethod
     def get_latitude_longitude(address: str) -> Union[Tuple[float, float], Tuple[None, None]]:
-        try:
-            app = Nominatim(user_agent="test")
-            location = app.geocode(address).raw
-
-            return float(location['lat']), float(location['lon'])
-
-        except Exception:
-            return None, None
+        """Get the latitude and longitude for a given address."""
+        app = Nominatim(user_agent="test")
+        location = app.geocode(address)
+        if location:
+            location_data = location.raw
+            return float(location_data['lat']), float(location_data['lon'])
+        return None, None
 
     @staticmethod
-    def get_area(address):
+    def get_area(address: str) -> Optional[float]:
+        """Get the area of a bounding box for a given address."""
         try:
             app = Nominatim(user_agent="test")
             location = app.geocode(address).raw
-            lat1 = location['boundingbox'][0]
-            lat2 = location['boundingbox'][1]
-            lon1 = location['boundingbox'][2]
-            lon2 = location['boundingbox'][3]
+            lat1, lat2 = float(location['boundingbox'][0]), float(location['boundingbox'][1])
+            lon1, lon2 = float(location['boundingbox'][2]), float(location['boundingbox'][3])
 
-            side1 = GetLatitudeLongitudeHelper.getDistance(lat1, lon1, lat1, lon2)
-            side2 = GetLatitudeLongitudeHelper.getDistance(lat1, lon2, lat2, lon2)
+            side1 = GetLatitudeLongitudeHelper.calculate_distance(lat1, lon1, lat1, lon2)
+            side2 = GetLatitudeLongitudeHelper.calculate_distance(lat1, lon2, lat2, lon2)
 
-            area = side1 * side2
-
-            return area
+            return side1 * side2
         except:
             return None
 
     @staticmethod
     def get_location(latitude: float, longitude: float) -> Location:
+        """Get the location object for given latitude and longitude."""
         nominatim = Nominatim(user_agent="test")
-        location = nominatim.reverse(str(latitude) + "," + str(longitude))
-        return location
+        return nominatim.reverse(f"{latitude},{longitude}")
 
     @staticmethod
-    def check_city(location: Location) -> bool:
-        address = location.raw[LocationConstants.ADDRESS]
+    def is_in_city(location: Location, city_name: str = ProcessingConstants.RECIFE) -> bool:
+        """Check if the location corresponds to a specific city."""
+        address = location.raw.get(LocationConstants.ADDRESS, {})
         city = address.get(LocationConstants.CITY, '')
-
-        if city == ProcessingConstants.RECIFE:
-            return True
-        else:
-            return False
+        return city == city_name
 
     @staticmethod
     def assert_distance_to_neighborhood_and_locality(
@@ -91,47 +92,39 @@ class GetLatitudeLongitudeHelper:
             longitude: float,
             neighborhood: str,
             locality: str
-    ) -> Union[Tuple[float, float], None]:
-
-        lat_and_lon_from_close_location = GetLatitudeLongitudeHelper.get_latitude_longitude(locality)
-        if not lat_and_lon_from_close_location:
-            lat_and_lon_from_close_location = GetLatitudeLongitudeHelper.get_latitude_longitude(neighborhood)
-        if not lat_and_lon_from_close_location:
+    ) -> Optional[Tuple[float, float]]:
+        """Assert if the distance to given neighborhood or locality is less than 1 km."""
+        lat_lon = GetLatitudeLongitudeHelper.get_latitude_longitude(locality)
+        if not lat_lon:
+            lat_lon = GetLatitudeLongitudeHelper.get_latitude_longitude(neighborhood)
+        if not lat_lon:
             return None
 
-        latitude_from_close_location = lat_and_lon_from_close_location[0]
-        longitude_from_close_location = lat_and_lon_from_close_location[1]
+        lat_from_loc, lon_from_loc = lat_lon
 
-        if GetLatitudeLongitudeHelper.getDistance(
-                latitude,
-                longitude,
-                latitude_from_close_location,
-                longitude_from_close_location
-        ) < 1:
+        distance = GetLatitudeLongitudeHelper.calculate_distance(
+            latitude, longitude, lat_from_loc, lon_from_loc
+        )
+
+        if distance < 1:
             return latitude, longitude
+        return None
 
     @staticmethod
-    def check_suburb(location: Location, input_suburb):
-        address = location.raw[LocationConstants.ADDRESS]
+    def check_suburb(location: Location, input_suburb: str) -> bool:
+        """Check if the given suburb matches the location suburb."""
+        address = location.raw.get(LocationConstants.ADDRESS, {})
         suburb = address.get(LocationConstants.SUBURB, '')
 
-        # filters the string suburb
-        suburb = ''.join((c for c in unicodedata.normalize(
-            'NFD', suburb) if unicodedata.category(c) != 'Mn'))
-        suburb = suburb.lower()
-        suburb = suburb.replace(" ", "")
+        suburb_normalized = GetLatitudeLongitudeHelper._normalize_string(suburb)
+        input_suburb_normalized = GetLatitudeLongitudeHelper._normalize_string(input_suburb)
 
-        # filters the string input_suburb
-        input_suburb = str(input_suburb)
-        input_suburb = ''.join((c for c in unicodedata.normalize(
-            'NFD', input_suburb) if unicodedata.category(c) != 'Mn'))
-        input_suburb = input_suburb.lower()
-        input_suburb = input_suburb.replace(" ", "")
-        similarity = GetLatitudeLongitudeHelper.similar(suburb, input_suburb)
+        similarity = GetLatitudeLongitudeHelper.similar(suburb_normalized, input_suburb_normalized)
+        return similarity > 0.7
 
-        has_same_suburb = False
-
-        if similarity > 0.7:
-            has_same_suburb = True
-
-        return has_same_suburb
+    @staticmethod
+    def _normalize_string(value: str) -> str:
+        """Normalize a string to a comparable format."""
+        value = unicodedata.normalize('NFD', value)
+        value = ''.join(c for c in value if unicodedata.category(c) != 'Mn')
+        return value.lower().replace(" ", "")

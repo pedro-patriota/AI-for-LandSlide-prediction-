@@ -1,12 +1,21 @@
-from pandas import DataFrame, merge, Series, read_csv, concat
+import time
+from typing import Tuple, List, Optional
+from xmlrpc.client import Error
 
-from base.pandas_constants import DataFrameConstants, ProcessingConstants, PathConstants, FilesConstants
+from pandas import DataFrame, Series, read_csv, concat
+
+from base.pandas_constants import (
+    DataFrameConstants,
+    ProcessingConstants,
+    PathConstants,
+    FilesConstants
+)
 from get_latitude_longitude_helper import GetLatitudeLongitudeHelper
 
 
 class GetLatitudeLongitude:
     """
-    Gets latitude and longitude information based on an address
+    Gets latitude and longitude information based on an address.
     """
 
     @staticmethod
@@ -14,30 +23,26 @@ class GetLatitudeLongitude:
             address: str,
             neighborhood_recife: str,
             locality_recife: str
-    ) -> (float, float):
+    ) -> Tuple[Optional[float], Optional[float]]:
+        """Find and assert latitude and longitude based on address."""
         latitude, longitude = GetLatitudeLongitudeHelper.get_latitude_longitude(address)
-        found = False
-
         if latitude and longitude:
             location = GetLatitudeLongitudeHelper.get_location(latitude, longitude)
-
-            in_recife = GetLatitudeLongitudeHelper.check_city(location)
+            in_recife = GetLatitudeLongitudeHelper.is_in_city(location)
             belongs_to_neighborhood = GetLatitudeLongitudeHelper.check_suburb(location, neighborhood_recife)
             belongs_to_locality = GetLatitudeLongitudeHelper.check_suburb(location, locality_recife)
 
-            found = in_recife and (belongs_to_neighborhood or belongs_to_locality)
-
-        return (latitude, longitude) if found else (None, None)
+            if in_recife and (belongs_to_neighborhood or belongs_to_locality):
+                return latitude, longitude
+        return None, None
 
     @staticmethod
-    def get_latitude_longitude_from_occurrence(occurrence: Series, found_dict: dict):
-        neighborhood = occurrence[DataFrameConstants.SOLICITACAO_BAIRRO]
-        street = occurrence[DataFrameConstants.SOLICITACAO_ENDERECO]
-        locality = occurrence[DataFrameConstants.SOLICITACAO_LOCALIDADE]
-
-        neighborhood = GetLatitudeLongitudeHelper.normalize_address(neighborhood)
-        street = GetLatitudeLongitudeHelper.normalize_address(street)
-        locality = GetLatitudeLongitudeHelper.normalize_address(locality)
+    def get_latitude_longitude_from_occurrence(occurrence: Series) -> Tuple[
+        Optional[float], Optional[float], Optional[str]]:
+        """Get latitude and longitude from a single occurrence."""
+        neighborhood = GetLatitudeLongitudeHelper.normalize_address(occurrence[DataFrameConstants.SOLICITACAO_BAIRRO])
+        street = GetLatitudeLongitudeHelper.normalize_address(occurrence[DataFrameConstants.SOLICITACAO_ENDERECO])
+        locality = GetLatitudeLongitudeHelper.normalize_address(occurrence[DataFrameConstants.SOLICITACAO_LOCALIDADE])
 
         street_recife = f'{street} {ProcessingConstants.RECIFE}'
         street_neighborhood = f'{street_recife} {neighborhood}'
@@ -48,6 +53,7 @@ class GetLatitudeLongitude:
             neighborhood,
             locality
         )
+        strategy = 'street_neighborhood'
 
         if latitude_longitude == (None, None):
             latitude_longitude = GetLatitudeLongitude.find_and_assert_latitude_longitude(
@@ -55,6 +61,7 @@ class GetLatitudeLongitude:
                 neighborhood,
                 locality
             )
+            strategy = 'street_locality'
 
             if latitude_longitude == (None, None):
                 latitude_longitude = GetLatitudeLongitude.find_and_assert_latitude_longitude(
@@ -62,22 +69,19 @@ class GetLatitudeLongitude:
                     neighborhood,
                     locality
                 )
-                if latitude_longitude != (None, None):
-                    found_dict['street_recife'] += 1
-            else:
-                found_dict['street_locality'] += 1
-        else:
-            found_dict['street_neighborhood'] += 1
+                strategy = 'street_recife'
 
-        if latitude_longitude != (None, None):
+        if latitude_longitude == (None, None):
+            strategy = None
+        else:
             print(f'Found latitude and longitude of occurrence {occurrence[DataFrameConstants.PROCESSO_NUMERO]}')
 
-        return latitude_longitude
+        return latitude_longitude[0], latitude_longitude[1], strategy
 
     @staticmethod
-    def get_outer_merge(df1: DataFrame, df2: DataFrame):
+    def get_outer_merge(df1: DataFrame, df2: DataFrame) -> DataFrame:
+        """Perform an outer merge on two DataFrames and return the unique rows."""
         df_concatenated = concat([df1, df2])
-
         df_unique = df_concatenated.drop_duplicates(subset=[DataFrameConstants.PROCESSO_NUMERO], keep=False)
         return df_unique[df_unique.index.isin(df1.index)]
 
@@ -88,30 +92,24 @@ class GetLatitudeLongitude:
             df_bad_locations: DataFrame,
             batch_size: int = 100
     ):
-        # df_merged is already sorted based on the is_confirmed column
-
+        """Process occurrences to get latitude and longitude in batches."""
         df_outer_bad = GetLatitudeLongitude.get_outer_merge(df_merged, df_bad_locations)
         df_outer_found = GetLatitudeLongitude.get_outer_merge(df_outer_bad, df_found_locations)
 
         print(f'There are {len(df_outer_found)} occurrences not processed')
         print(f'Reading batch of size {batch_size}')
 
-        df_outer_found = df_outer_found.iloc[0:batch_size]
+        df_outer_found = df_outer_found.iloc[:batch_size]
         df_outer_found[DataFrameConstants.LATITUDE] = ProcessingConstants.UNKNOWN_COORDINATES
         df_outer_found[DataFrameConstants.LONGITUDE] = ProcessingConstants.UNKNOWN_COORDINATES
-
-        found_dict = {
-            'street_neighborhood': 0,
-            'street_locality': 0,
-            'street_recife': 0
-        }
+        df_outer_found[DataFrameConstants.LOCATION_STRATEGY] = None
 
         for index, occurrence in df_outer_found.iterrows():
-            latitude, longitude = GetLatitudeLongitude.get_latitude_longitude_from_occurrence(occurrence, found_dict)
-            print(found_dict)
+            latitude, longitude, strategy = GetLatitudeLongitude.get_latitude_longitude_from_occurrence(occurrence)
 
             df_outer_found.loc[index, DataFrameConstants.LATITUDE] = latitude
             df_outer_found.loc[index, DataFrameConstants.LONGITUDE] = longitude
+            df_outer_found.loc[index, DataFrameConstants.LOCATION_STRATEGY] = strategy
 
         df_bad_rows = df_outer_found[
             df_outer_found[DataFrameConstants.LATITUDE].isna() | df_outer_found[DataFrameConstants.LONGITUDE].isna()
@@ -127,7 +125,8 @@ class GetLatitudeLongitude:
         df_found_locations.to_csv(PathConstants.FOUND_LOCATIONS, index=False, header=True)
 
 
-def safe_read_csv(path: str, columns: list[str]) -> DataFrame:
+def safe_read_csv(path: str, columns: List[str]) -> DataFrame:
+    """Safely read a CSV file into a DataFrame, creating a new DataFrame if the file is not found."""
     df = DataFrame(columns=columns)
     try:
         df = read_csv(path)
@@ -137,9 +136,19 @@ def safe_read_csv(path: str, columns: list[str]) -> DataFrame:
 
 
 if __name__ == '__main__':
-    for i in range(100):
+    while True:
         df_merged = read_csv(FilesConstants.MERGED)
         df_found_locations = safe_read_csv(FilesConstants.FOUND_LOCATIONS, df_merged.columns.to_list())
         df_bad_locations = safe_read_csv(FilesConstants.BAD_LOCATIONS, df_merged.columns.to_list())
 
-        GetLatitudeLongitude.get_latitude_longitude(df_merged, df_found_locations, df_bad_locations, 10)
+        if len(df_merged) == len(df_found_locations) + len(df_bad_locations):
+            print("There is no row to process")
+            break
+
+        try:
+            GetLatitudeLongitude.get_latitude_longitude(df_merged, df_found_locations, df_bad_locations, 10)
+            print("Finished reading batch")
+        except Exception as error:
+            print(Error)
+            print("Trying once more...")
+            time.sleep(10)
