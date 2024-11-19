@@ -71,6 +71,9 @@ class GetLatitudeLongitude:
                 strategy = 'street_recife'
 
         if latitude_longitude == (None, None):
+            print(
+                f'Did not found latitude and longitude of occurrence {occurrence[DataFrameConstants.PROCESSO_NUMERO]}'
+            )
             strategy = None
         else:
             print(f'Found latitude and longitude of occurrence {occurrence[DataFrameConstants.PROCESSO_NUMERO]}')

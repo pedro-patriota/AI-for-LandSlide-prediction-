@@ -3,6 +3,7 @@ from typing import Union, Tuple, Optional
 
 import geopy.distance
 import unicodedata
+from geopy.point import Point
 from geopy.geocoders import Nominatim
 from geopy.location import Location
 
@@ -51,7 +52,15 @@ class GetLatitudeLongitudeHelper:
     def get_latitude_longitude(address: str) -> Union[Tuple[float, float], Tuple[None, None]]:
         """Get the latitude and longitude for a given address."""
         app = Nominatim(user_agent="test")
-        location = app.geocode(address)
+        upper_leftmost_point = Point(latitude=-7.95888, longitude=-34.97243)
+        lower_rightmost_point = Point(latitude=-8.21177, longitude=-34.82814)
+        location = app.geocode(
+            address,
+            timeout=10,
+            viewbox=[upper_leftmost_point, lower_rightmost_point],
+            country_codes='br',
+            bounded=True
+        )
         if location:
             location_data = location.raw
             return float(location_data['lat']), float(location_data['lon'])
@@ -106,7 +115,7 @@ class GetLatitudeLongitudeHelper:
             latitude, longitude, lat_from_loc, lon_from_loc
         )
 
-        if distance < 1:
+        if distance < 2:
             return latitude, longitude
         return None
 
