@@ -1,5 +1,5 @@
 import time
-from typing import Tuple, List, Optional
+from typing import Tuple, Optional
 
 from pandas import DataFrame, Series, read_csv, concat
 
@@ -7,8 +7,9 @@ from base.pandas_constants import (
     DataFrameConstants,
     ProcessingConstants,
     PathConstants,
-    FilesConstants
+    FilesConstants, ValuesConstants
 )
+from base.pandas_helper import PandasHelper
 from get_latitude_longitude_helper import GetLatitudeLongitudeHelper
 
 
@@ -81,13 +82,6 @@ class GetLatitudeLongitude:
         return latitude_longitude[0], latitude_longitude[1], strategy
 
     @staticmethod
-    def get_outer_merge(df1: DataFrame, df2: DataFrame) -> DataFrame:
-        """Perform an outer merge on two DataFrames and return the unique rows."""
-        df_concatenated = concat([df1, df2])
-        df_unique = df_concatenated.drop_duplicates(subset=[DataFrameConstants.PROCESSO_NUMERO], keep=False)
-        return df_unique[df_unique.index.isin(df1.index)]
-
-    @staticmethod
     def get_latitude_longitude(
             df_merged: DataFrame,
             df_found_locations: DataFrame,
@@ -95,15 +89,15 @@ class GetLatitudeLongitude:
             batch_size: int = 100
     ):
         """Process occurrences to get latitude and longitude in batches."""
-        df_outer_bad = GetLatitudeLongitude.get_outer_merge(df_merged, df_bad_locations)
-        df_outer_found = GetLatitudeLongitude.get_outer_merge(df_outer_bad, df_found_locations)
+        df_outer_bad = PandasHelper.get_outer_merge(df_merged, df_bad_locations)
+        df_outer_found = PandasHelper.get_outer_merge(df_outer_bad, df_found_locations)
 
         print(f'There are {len(df_outer_found)} occurrences not processed')
         print(f'Reading batch of size {batch_size}')
 
         df_outer_found = df_outer_found.iloc[:batch_size]
-        df_outer_found[DataFrameConstants.LATITUDE] = ProcessingConstants.UNKNOWN_COORDINATES
-        df_outer_found[DataFrameConstants.LONGITUDE] = ProcessingConstants.UNKNOWN_COORDINATES
+        df_outer_found[DataFrameConstants.LATITUDE] = ValuesConstants.UNKNOWN_COORDINATES
+        df_outer_found[DataFrameConstants.LONGITUDE] = ValuesConstants.UNKNOWN_COORDINATES
         df_outer_found[DataFrameConstants.LOCATION_STRATEGY] = None
 
         for index, occurrence in df_outer_found.iterrows():
@@ -114,10 +108,12 @@ class GetLatitudeLongitude:
             df_outer_found.loc[index, DataFrameConstants.LOCATION_STRATEGY] = strategy
 
         df_bad_rows = df_outer_found[
-            df_outer_found[DataFrameConstants.LATITUDE].isna() | df_outer_found[DataFrameConstants.LONGITUDE].isna()
+            df_outer_found[DataFrameConstants.LATITUDE].isna() |
+            df_outer_found[DataFrameConstants.LONGITUDE].isna()
             ]
         df_good_rows = df_outer_found[
-            df_outer_found[DataFrameConstants.LATITUDE].notna() & df_outer_found[DataFrameConstants.LONGITUDE].notna()
+            df_outer_found[DataFrameConstants.LATITUDE].notna() &
+            df_outer_found[DataFrameConstants.LONGITUDE].notna()
             ]
 
         df_bad_locations = concat([df_bad_locations, df_bad_rows], ignore_index=True)
@@ -127,21 +123,11 @@ class GetLatitudeLongitude:
         df_found_locations.to_csv(PathConstants.FOUND_LOCATIONS, index=False, header=True)
 
 
-def safe_read_csv(path: str, columns: List[str]) -> DataFrame:
-    """Safely read a CSV file into a DataFrame, creating a new DataFrame if the file is not found."""
-    df = DataFrame(columns=columns)
-    try:
-        df = read_csv(path)
-    except Exception:
-        print(f'File not found: {path}, creating new file...')
-    return df
-
-
 if __name__ == '__main__':
     while True:
-        df_merged = read_csv(FilesConstants.MERGED)
-        df_found_locations = safe_read_csv(FilesConstants.FOUND_LOCATIONS, df_merged.columns.to_list())
-        df_bad_locations = safe_read_csv(FilesConstants.BAD_LOCATIONS, df_merged.columns.to_list())
+        df_merged = read_csv(PathConstants.MERGED_PATH)
+        df_found_locations = PandasHelper.safe_read_csv(FilesConstants.FOUND_LOCATIONS, df_merged.columns.to_list())
+        df_bad_locations = PandasHelper.safe_read_csv(FilesConstants.BAD_LOCATIONS, df_merged.columns.to_list())
 
         if len(df_merged) == len(df_found_locations) + len(df_bad_locations):
             print("There is no row to process")
