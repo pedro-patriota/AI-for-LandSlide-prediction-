@@ -12,9 +12,13 @@ from base.pandas_helper import PandasHelper
 
 
 class GetGroundType:
+    """
+    Gets the ground type based on the location
+    """
 
     @staticmethod
     def get_label(ground_map_df: DataFrame, point: Point) -> str:
+        """Get the ground type label for a given point."""
         label = None
         for multipolygon, type in zip(
                 ground_map_df[GroundTypeConstants.THE_GEOM],
@@ -38,6 +42,7 @@ class GetGroundType:
             df_found_ground_type: DataFrame,
             batch_size: int = 10
     ) -> None:
+        """Process ground types for a batch of points."""
         df_outer_bad = PandasHelper.get_outer_merge(df_rain_elevation, df_bad_ground_type)
         df_outer_found = PandasHelper.get_outer_merge(df_outer_bad, df_found_ground_type)
 
