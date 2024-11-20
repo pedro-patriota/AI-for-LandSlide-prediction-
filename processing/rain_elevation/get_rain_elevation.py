@@ -1,5 +1,6 @@
 import time
 from datetime import datetime, timedelta
+from math import isnan
 from typing import Optional, Tuple
 
 from meteostat import Point, Stations
@@ -35,18 +36,30 @@ class GetRainElevation:
             GetRaiElevationHelper.get_rain_inmep(date, i) for i in range(24)
         ) if rain_hour is not None else None
 
-        if rain_hour is None and rain_day is None:
+        if rain_hour is None or rain_day is None:
             start_date = datetime(year, month, day)
             end_date = start_date + timedelta(days=1)
 
             location = Point(latitude, longitude)
 
             rain_hour, rain_day = GetRaiElevationHelper.get_rain_meteostat(location, start_date, end_date, hour)
-            if rain_hour is None and rain_day is None:
-                stations = Stations().nearby(latitude, longitude).fetch(1)
-                station_id = stations.iat[0, stations.columns.get_loc(RainElevationConstants.WMO)]
-                rain_hour, rain_day = GetRaiElevationHelper.get_rain_meteostat(station_id, start_date, end_date, hour)
-
+            if isnan(rain_hour) or isnan(rain_day):
+                stations = Stations().nearby(latitude, longitude).fetch(3)
+                for i in range(min(3, len(stations))):
+                    station_id = stations.iat[i, stations.columns.get_loc(RainElevationConstants.WMO)]
+                    rain_hour, rain_day = GetRaiElevationHelper.get_rain_meteostat(
+                        station_id,
+                        start_date,
+                        end_date,
+                        hour
+                    )
+                    if not isnan(rain_hour) and not isnan(rain_day):
+                        break
+        if isnan(rain_hour) or isnan(rain_day):
+            print(f'Did not found rain and elevation of occurrence {occurrence[DataFrameConstants.PROCESSO_NUMERO]}')
+        else:
+            print(
+                f'Found rain and elevation of occurrence {occurrence[DataFrameConstants.PROCESSO_NUMERO]} {rain_hour:.2f} {rain_day:.2f}')
         return rain_hour, rain_day
 
     @staticmethod
@@ -120,7 +133,7 @@ if __name__ == '__main__':
                 df_locations=df_locations,
                 df_bad_rain_elevation=df_bad_rain_elevation,
                 df_found_rain_elevation=df_found_rain_elevation,
-                batch_size=10
+                batch_size=20
             )
             print("Finished reading batch")
         except Exception as error:

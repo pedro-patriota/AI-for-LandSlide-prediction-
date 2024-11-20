@@ -1,8 +1,9 @@
 from datetime import datetime
+from math import nan
 from typing import Optional, Tuple, Union
 
 import requests
-from meteostat import Hourly, Point
+from meteostat import Hourly, Point, Daily
 from pandas import DataFrame, json_normalize
 
 from base.pandas_constants import RainElevationConstants, ProcessingConstants, DataFrameConstants
@@ -48,10 +49,14 @@ class GetRaiElevationHelper:
             end_date: datetime,
             hour: int
     ) -> Tuple[Optional[float], Optional[float]]:
-        data = Hourly(station, start_date, end_date, timezone=RainElevationConstants.TIMEZONE).fetch()
-        rain_hour = data.iat[hour, data.columns.get_loc(RainElevationConstants.PRCP)]
-        rain_day = round(float(sum(data[RainElevationConstants.PRCP])), 2)
-
+        rain_hour, rain_day = nan, nan
+        try:
+            data = Hourly(station, start_date, end_date, timezone=RainElevationConstants.TIMEZONE).fetch()
+            rain_hour = data.iat[hour, data.columns.get_loc(RainElevationConstants.PRCP)]
+            rain_day = round(float(sum(data[RainElevationConstants.PRCP])), 2)
+        except Exception as error:
+            print(error.__str__())
+            pass
         return rain_hour, rain_day
 
     @staticmethod
