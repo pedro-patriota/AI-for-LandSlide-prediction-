@@ -3,13 +3,13 @@ from math import nan
 from typing import Optional, Tuple, Union
 
 import requests
-from meteostat import Hourly, Point, Daily
+from meteostat import Hourly, Point
 from pandas import DataFrame, json_normalize
 
 from base.pandas_constants import RainElevationConstants, ProcessingConstants, DataFrameConstants
 
 
-class GetRaiElevationHelper:
+class GetRainElevationHelper:
     """
     Helper class for get rain and altitude
     """
@@ -49,6 +49,7 @@ class GetRaiElevationHelper:
             end_date: datetime,
             hour: int
     ) -> Tuple[Optional[float], Optional[float]]:
+        """Fetch rain data from Meteostat API for a specific station, date range, and hour."""
         rain_hour, rain_day = nan, nan
         try:
             data = Hourly(station, start_date, end_date, timezone=RainElevationConstants.TIMEZONE).fetch()
@@ -61,6 +62,7 @@ class GetRaiElevationHelper:
 
     @staticmethod
     def extract_metadata_from_date_time(date_time_str: str) -> tuple[int, int, int, int, int]:
+        """Extract year, month, day, hour, and minute from a date-time string."""
         date_time = datetime.strptime(date_time_str, '%Y/%m/%d %H:%M:%S')
         return date_time.year, date_time.month, date_time.day, date_time.hour, date_time.minute
 
@@ -68,8 +70,6 @@ class GetRaiElevationHelper:
     def preprocess_data(df: DataFrame) -> DataFrame:
         """Preprocess the data to format date and time correctly."""
         df[DataFrameConstants.SOLICITACAO_DATA] = df[DataFrameConstants.SOLICITACAO_DATA].str.replace('-', '/')
-
         df[DataFrameConstants.SOLICITACAO_DATA_HORA] = df[DataFrameConstants.SOLICITACAO_DATA] + ' ' + df[
             DataFrameConstants.SOLICITACAO_HORA].astype(str) + ':00'
-
         return df
