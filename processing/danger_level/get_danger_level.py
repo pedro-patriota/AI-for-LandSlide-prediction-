@@ -30,7 +30,9 @@ class GetDangerLevel:
                     if row[DangerLevelConstants.CLASSE] != DangerLevelConstants.WRONG_MEDIA
                     else DangerLevelConstants.CORRECT_MEDIA
                 )
+                print(f'Found danger level of point {point}')
                 return danger_level_class
+        print(f'Did not find danger level of point {point}')
         return None
 
     @staticmethod
@@ -72,7 +74,7 @@ class GetDangerLevel:
 
 if __name__ == '__main__':
     while True:
-        df_ground_type = read_csv(PathConstants.FOUND_RAIN_ELEVATION_PATH)
+        df_ground_type = read_csv(PathConstants.FOUND_GROUND_AMPLITUDE_PATH)
 
         df_found_danger_level = PandasHelper.safe_read_csv(
             FilesConstants.FOUND_DANGER_LEVEL,
@@ -92,7 +94,7 @@ if __name__ == '__main__':
                 df_ground_type=df_ground_type,
                 df_bad_danger_level=df_bad_danger_level,
                 df_found_danger_level=df_found_danger_level,
-                batch_size=100
+                batch_size=300
             )
             print("Finished reading batch")
         except Exception as error:

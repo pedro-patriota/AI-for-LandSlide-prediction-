@@ -96,7 +96,7 @@ class GetGroundAmplitude:
 
 if __name__ == '__main__':
     while True:
-        df_ground_type = read_csv(PathConstants.FOUND_RAIN_ELEVATION_PATH)
+        df_ground_type = read_csv(PathConstants.FOUND_GROUND_TYPE_PATH)
 
         df_found_ground_amplitude = PandasHelper.safe_read_csv(
             FilesConstants.FOUND_GROUND_AMPLITUDE,
@@ -116,7 +116,7 @@ if __name__ == '__main__':
                 df_ground_type=df_ground_type,
                 df_bad_ground_amplitude=df_bad_ground_amplitude,
                 df_found_ground_amplitude=df_found_ground_amplitude,
-                batch_size=100
+                batch_size=300
             )
             print("Finished reading batch")
         except Exception as error:
