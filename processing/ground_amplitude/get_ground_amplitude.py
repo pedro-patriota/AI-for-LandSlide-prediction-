@@ -14,6 +14,9 @@ from base.pandas_helper import PandasHelper
 
 
 class GetGroundAmplitude:
+    """
+    Gets the ground amplitude based on the location.
+    """
 
     @staticmethod
     def check_point_in_geojson(
@@ -21,6 +24,7 @@ class GetGroundAmplitude:
             latitude: float,
             longitude: float
     ) -> Union[Tuple[str, str, str], Tuple[None, None, None]]:
+        """Check if a point (latitude, longitude) is inside any multipolygon in the GeoDataFrame."""
         point = Point(longitude, latitude)
 
         for index, row in gdf.iterrows():
@@ -32,7 +36,8 @@ class GetGroundAmplitude:
                 print(f'Found ground amplitude of point {point}')
 
                 return ground_amplitude, slope_degree, slope_percentage
-        print(f'Did not found ground amplitude of point {point}')
+
+        print(f'Did not find ground amplitude of point {point}')
         return None, None, None
 
     @staticmethod
@@ -42,6 +47,7 @@ class GetGroundAmplitude:
             df_found_ground_amplitude: DataFrame,
             batch_size: int = 10
     ) -> None:
+        """Update the DataFrame with ground amplitude information."""
         df_outer_bad = PandasHelper.get_outer_merge(df_ground_type, df_bad_ground_amplitude)
         df_outer_found = PandasHelper.get_outer_merge(df_outer_bad, df_found_ground_amplitude)
 
@@ -53,6 +59,7 @@ class GetGroundAmplitude:
         df_outer_found[DataFrameConstants.SLOPE_DEGREE] = ValuesConstants.UNKNOWN_VALUE
         df_outer_found[DataFrameConstants.SLOPE_PERCENTAGE] = ValuesConstants.UNKNOWN_VALUE
 
+        # Load the GeoDataFrame for the ground amplitude data
         gdf = read_file(PathConstants.PADRAO_DE_RELEVO_PATH, encoding='utf-8')
 
         for index, occurrence in df_outer_found.iterrows():
@@ -73,12 +80,12 @@ class GetGroundAmplitude:
             df_outer_found[DataFrameConstants.GROUND_AMPLITUDE].isna() |
             df_outer_found[DataFrameConstants.SLOPE_DEGREE].isna() |
             df_outer_found[DataFrameConstants.SLOPE_PERCENTAGE].isna()
-        ]
+            ]
         df_good_rows = df_outer_found[
             df_outer_found[DataFrameConstants.GROUND_AMPLITUDE].notna() &
             df_outer_found[DataFrameConstants.SLOPE_DEGREE].notna() &
             df_outer_found[DataFrameConstants.SLOPE_PERCENTAGE].notna()
-        ]
+            ]
 
         df_bad_ground_amplitude = concat([df_bad_ground_amplitude, df_bad_rows], ignore_index=True)
         df_found_ground_amplitude = concat([df_found_ground_amplitude, df_good_rows], ignore_index=True)

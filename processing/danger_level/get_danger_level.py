@@ -14,11 +14,14 @@ from base.pandas_helper import PandasHelper
 
 
 class GetDangerLevel:
+    """
+    Gets the danger level based on the location
+    """
 
     @staticmethod
     def check_point_in_geojson(gdf: GeoDataFrame, latitude: float, longitude: float) -> Union[str, None]:
+        """Check if a point defined by latitude and longitude is within a geojson and determine its danger level."""
         point = Point(longitude, latitude)
-
         for index, row in gdf.iterrows():
             geometry = row[DangerLevelConstants.GEOMETRY]
             if geometry.contains(point):
@@ -27,7 +30,6 @@ class GetDangerLevel:
                     if row[DangerLevelConstants.CLASSE] != DangerLevelConstants.WRONG_MEDIA
                     else DangerLevelConstants.CORRECT_MEDIA
                 )
-
                 return danger_level_class
         return None
 
@@ -38,6 +40,7 @@ class GetDangerLevel:
             df_found_danger_level: DataFrame,
             batch_size: int = 10
     ) -> None:
+        """Process batches of data to determine danger levels and update DataFrames accordingly."""
         df_outer_bad = PandasHelper.get_outer_merge(df_ground_type, df_bad_danger_level)
         df_outer_found = PandasHelper.get_outer_merge(df_outer_bad, df_found_danger_level)
 
