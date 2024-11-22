@@ -144,3 +144,10 @@ class PathConstants(FilesConstants):
     MERGED_PATH = f'../merge/{FilesConstants.MERGED}'
     MOVIMENTO_MASSA_PATH = f'../danger_level/deslizamento_de_massas/{FilesConstants.MOVIMENTO_MASSA}'
     PADRAO_DE_RELEVO_PATH = f'../ground_amplitude/ground_amplitude_data/{FilesConstants.PADRAO_DE_RELEVO}'
+
+
+class AlgorithmConstants:
+    """
+    Stores algorithm constants
+    """
+    FINAL_DF_PATH = f'../{FilesConstants.FINAL_DF}'
