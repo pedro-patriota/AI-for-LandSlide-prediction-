@@ -14,6 +14,7 @@ class FilesConstants:
     FOUND_GROUND_AMPLITUDE = f'found_ground_amplitude{CSV_SUFFIX}'
     FOUND_GROUND_TYPE = f'found_ground_type{CSV_SUFFIX}'
     FOUND_LOCATIONS = f'found_locations{CSV_SUFFIX}'
+    FINAL_DF = f'final_df{CSV_SUFFIX}'
     FOUND_RAIN_ELEVATION = f'found_rain_elevation{CSV_SUFFIX}'
     GROUND_MAP = f'mapa_exploratorio_solos_pernambuco_wgs84{CSV_SUFFIX}'
     MERGED = f'merged{CSV_SUFFIX}'
@@ -101,6 +102,7 @@ class DangerLevelConstants:
     GEOMETRY = 'geometry'
     WRONG_MEDIA = 'M�dia'
 
+
 class GroundAmplitudeConstants:
     """
     Stores ground amplitude constants
@@ -109,6 +111,7 @@ class GroundAmplitudeConstants:
     DECL_GRAU = 'DECL_GRAU'
     DECL_PER = 'DECL_PER'
     GEOMETRY = 'geometry'
+
 
 class ValuesConstants:
     """
@@ -132,11 +135,12 @@ class PathConstants(FilesConstants):
     BAD_GROUND_TYPE_PATH = f'../ground_type/{FilesConstants.BAD_GROUND_TYPE}'
     BAD_LOCATIONS_PATH = f'../location/{FilesConstants.BAD_LOCATIONS}'
     BAD_RAIN_ELEVATION_PATH = f'../rain_elevation/{FilesConstants.BAD_RAIN_ELEVATION}'
+    FINAL_DF_PATH = f'../../algorithm/{FilesConstants.FINAL_DF}'
     FOUND_DANGER_LEVEL_PATH = f'../danger_level/{FilesConstants.FOUND_DANGER_LEVEL}'
     FOUND_GROUND_AMPLITUDE_PATH = f'../ground_amplitude/{FilesConstants.FOUND_GROUND_AMPLITUDE}'
     FOUND_GROUND_TYPE_PATH = f'../ground_type/{FilesConstants.FOUND_GROUND_TYPE}'
     FOUND_LOCATIONS_PATH = f'../location/{FilesConstants.FOUND_LOCATIONS}'
-    PADRAO_DE_RELEVO_PATH = f'../ground_amplitude/ground_amplitude_data/{FilesConstants.PADRAO_DE_RELEVO}'
     FOUND_RAIN_ELEVATION_PATH = f'../rain_elevation/{FilesConstants.FOUND_RAIN_ELEVATION}'
     MERGED_PATH = f'../merge/{FilesConstants.MERGED}'
     MOVIMENTO_MASSA_PATH = f'../danger_level/deslizamento_de_massas/{FilesConstants.MOVIMENTO_MASSA}'
+    PADRAO_DE_RELEVO_PATH = f'../ground_amplitude/ground_amplitude_data/{FilesConstants.PADRAO_DE_RELEVO}'
