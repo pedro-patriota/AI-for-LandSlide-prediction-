@@ -66,7 +66,11 @@ class LocationConstants:
     ADDRESS = 'address'
     CITY = 'city'
     SUBURB = 'suburb'
-
+    ADDRESS_COMPONENTS = 'address_components'
+    LONG_NAME = 'long_name'
+    LOCATION = 'location'
+    LAT = 'LAT'
+    LNG = 'LNG'
 
 class RainElevationConstants:
     """
@@ -87,31 +91,30 @@ class ProcessingConstants:
     Stores processing constants
     """
     CONFIRMED = 2
+    API_KEY = 'API_KEY'
+    GOOGLE_MAPS_API = 'google maps api'
     MAYBE_CONFIRMED = 1
     NOT_CONFIRMED = 0
     RECIFE = 'Recife'
     RESULTS = 'results'
+    GEOMETRY = 'geometry'
 
-
-class DangerLevelConstants:
+class DangerLevelConstants(ProcessingConstants):
     """
     Stores danger level constants
     """
     CLASSE = 'CLASSE'
     CORRECT_MEDIA = 'Media'
-    GEOMETRY = 'geometry'
     WRONG_MEDIA = 'M�dia'
 
 
-class GroundAmplitudeConstants:
+class GroundAmplitudeConstants(ProcessingConstants):
     """
     Stores ground amplitude constants
     """
     AMPLITUDE = 'AMPLITUDE_'
     DECL_GRAU = 'DECL_GRAU'
     DECL_PER = 'DECL_PER'
-    GEOMETRY = 'geometry'
-
 
 class ValuesConstants:
     """

@@ -7,11 +7,12 @@ from base.pandas_constants import (
     DataFrameConstants,
     ProcessingConstants,
     PathConstants,
-    FilesConstants, ValuesConstants
+    FilesConstants, ValuesConstants, LocationConstants
 )
 from base.pandas_helper import PandasHelper
 from get_latitude_longitude_helper import GetLatitudeLongitudeHelper
-
+import os
+import googlemaps
 
 class GetLatitudeLongitude:
     """
@@ -37,17 +38,14 @@ class GetLatitudeLongitude:
         return None, None
 
     @staticmethod
-    def get_latitude_longitude_from_occurrence(occurrence: Series) -> Tuple[
-        Optional[float], Optional[float], Optional[str]]:
-        """Get latitude and longitude from a single occurrence."""
-        neighborhood = GetLatitudeLongitudeHelper.normalize_address(occurrence[DataFrameConstants.SOLICITACAO_BAIRRO])
-        street = GetLatitudeLongitudeHelper.normalize_address(occurrence[DataFrameConstants.SOLICITACAO_ENDERECO])
-        locality = GetLatitudeLongitudeHelper.normalize_address(occurrence[DataFrameConstants.SOLICITACAO_LOCALIDADE])
-
-        street_recife = f'{street} {ProcessingConstants.RECIFE}'
-        street_neighborhood = f'{street_recife} {neighborhood}'
-        street_locality = f'{street_recife} {locality}'
-
+    def get_latitude_longitude_using_nominatim(
+            street_recife,
+            street_neighborhood,
+            street_locality,
+            neighborhood,
+            locality
+    ):
+        """Get latitude and longitude from a single occurrence using nominatim api."""
         latitude_longitude = GetLatitudeLongitude.find_and_assert_latitude_longitude(
             street_neighborhood,
             neighborhood,
@@ -71,15 +69,41 @@ class GetLatitudeLongitude:
                 )
                 strategy = 'street_recife'
 
-        if latitude_longitude == (None, None):
-            print(
-                f'Did not found latitude and longitude of occurrence {occurrence[DataFrameConstants.PROCESSO_NUMERO]}'
-            )
-            strategy = None
-        else:
-            print(f'Found latitude and longitude of occurrence {occurrence[DataFrameConstants.PROCESSO_NUMERO]}')
-
         return latitude_longitude[0], latitude_longitude[1], strategy
+
+    @staticmethod
+    def get_latitude_longitude_from_occurrence(occurrence: Series) -> Tuple[
+        Optional[float], Optional[float], Optional[str]]:
+        """Get latitude and longitude from a single occurrence using google maps api."""
+        neighborhood = GetLatitudeLongitudeHelper.normalize_address(occurrence[DataFrameConstants.SOLICITACAO_BAIRRO])
+        street = GetLatitudeLongitudeHelper.normalize_address(occurrence[DataFrameConstants.SOLICITACAO_ENDERECO])
+        locality = GetLatitudeLongitudeHelper.normalize_address(occurrence[DataFrameConstants.SOLICITACAO_LOCALIDADE])
+
+        address = street + ', ' + neighborhood + ', ' + locality + ', ' + ProcessingConstants.RECIFE
+
+        key = str(os.environ[ProcessingConstants.API_KEY])
+        strategy = ProcessingConstants.GOOGLE_MAPS_API
+        gmaps = googlemaps.Client(key=key)
+        geocode_result = gmaps.geocode(address)
+        if not geocode_result or len(geocode_result) == 0:
+            print(f"Did not found latitude and longitude for occurrence {occurrence[DataFrameConstants.PROCESSO_NUMERO]}")
+            return None, None, None
+
+        address_components = geocode_result[0][LocationConstants.ADDRESS_COMPONENTS]
+        is_in_recife = False
+        for component in address_components:
+            if component[LocationConstants.LONG_NAME] == ProcessingConstants.RECIFE:
+                is_in_recife = True
+                break
+        if not is_in_recife:
+            print(f"Did not found latitude and longitude for occurrence {occurrence[DataFrameConstants.PROCESSO_NUMERO]}")
+            return None, None, None
+
+        latitude = (geocode_result[0][ProcessingConstants.GEOMETRY][LocationConstants.LOCATION][LocationConstants.LAT])
+        longitude = (geocode_result[0][ProcessingConstants.GEOMETRY][LocationConstants.LOCATION][LocationConstants.LNG])
+        print(f"Found latitude and longitude for occurrence {occurrence[DataFrameConstants.PROCESSO_NUMERO]}")
+
+        return latitude, longitude, strategy
 
     @staticmethod
     def get_latitude_longitude(
@@ -134,7 +158,7 @@ if __name__ == '__main__':
             break
 
         try:
-            GetLatitudeLongitude.get_latitude_longitude(df_merged, df_found_locations, df_bad_locations, 10)
+            GetLatitudeLongitude.get_latitude_longitude(df_merged, df_found_locations, df_bad_locations, 50)
             print("Finished reading batch")
         except Exception as error:
             print(error.__str__())
