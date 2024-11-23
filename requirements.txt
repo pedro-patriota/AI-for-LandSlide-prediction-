@@ -7,3 +7,4 @@ meteostat==1.6.8
 geopandas==1.0.1
 notebook==7.2.2
 scikit-learn==1.5.2
+googlemaps==4.10.0
