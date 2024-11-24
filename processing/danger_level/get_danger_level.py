@@ -94,7 +94,7 @@ if __name__ == '__main__':
                 df_ground_type=df_ground_type,
                 df_bad_danger_level=df_bad_danger_level,
                 df_found_danger_level=df_found_danger_level,
-                batch_size=300
+                batch_size=500
             )
             print("Finished reading batch")
         except Exception as error:

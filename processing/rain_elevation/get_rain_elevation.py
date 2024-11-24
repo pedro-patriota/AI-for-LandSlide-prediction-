@@ -65,13 +65,13 @@ class GetRainElevation:
 
     @staticmethod
     def get_rain_elevation(
-            df_locations: DataFrame,
+            df_danger_level: DataFrame,
             df_bad_rain_elevation: DataFrame,
             df_found_rain_elevation: DataFrame,
             batch_size: int = 5
     ) -> None:
         """Update the DataFrame with rain and elevation information."""
-        df_outer_bad = PandasHelper.get_outer_merge(df_locations, df_bad_rain_elevation)
+        df_outer_bad = PandasHelper.get_outer_merge(df_danger_level, df_bad_rain_elevation)
         df_outer_found = PandasHelper.get_outer_merge(df_outer_bad, df_found_rain_elevation)
 
         print(f'There are {len(df_outer_found)} occurrences not processed')
@@ -114,24 +114,24 @@ class GetRainElevation:
 
 if __name__ == '__main__':
     while True:
-        df_locations = read_csv(PathConstants.FOUND_LOCATIONS_PATH)
+        df_danger_level = read_csv(PathConstants.FOUND_DANGER_LEVEL_PATH)
 
         df_found_rain_elevation = PandasHelper.safe_read_csv(
             FilesConstants.FOUND_RAIN_ELEVATION,
-            df_locations.columns.to_list()
+            df_danger_level.columns.to_list()
         )
         df_bad_rain_elevation = PandasHelper.safe_read_csv(
             FilesConstants.BAD_RAIN_ELEVATION,
-            df_locations.columns.to_list()
+            df_danger_level.columns.to_list()
         )
 
-        if len(df_locations) == len(df_found_rain_elevation) + len(df_bad_rain_elevation):
+        if len(df_danger_level) == len(df_found_rain_elevation) + len(df_bad_rain_elevation):
             print("There is no row to process")
             break
 
         try:
             GetRainElevation.get_rain_elevation(
-                df_locations=df_locations,
+                df_danger_level=df_danger_level,
                 df_bad_rain_elevation=df_bad_rain_elevation,
                 df_found_rain_elevation=df_found_rain_elevation,
                 batch_size=20

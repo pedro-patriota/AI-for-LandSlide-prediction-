@@ -37,13 +37,13 @@ class GetGroundType:
 
     @staticmethod
     def get_ground_type(
-            df_rain_elevation: DataFrame,
+            df_location: DataFrame,
             df_bad_ground_type: DataFrame,
             df_found_ground_type: DataFrame,
             batch_size: int = 10
     ) -> None:
         """Process ground types for a batch of points."""
-        df_outer_bad = PandasHelper.get_outer_merge(df_rain_elevation, df_bad_ground_type)
+        df_outer_bad = PandasHelper.get_outer_merge(df_location, df_bad_ground_type)
         df_outer_found = PandasHelper.get_outer_merge(df_outer_bad, df_found_ground_type)
 
         print(f'There are {len(df_outer_found)} occurrences not processed')
@@ -74,27 +74,27 @@ class GetGroundType:
 
 if __name__ == '__main__':
     while True:
-        df_rain_elevation = read_csv(PathConstants.FOUND_RAIN_ELEVATION_PATH)
+        df_location = read_csv(PathConstants.FOUND_LOCATIONS_PATH)
 
         df_found_ground_type = PandasHelper.safe_read_csv(
             FilesConstants.FOUND_GROUND_TYPE,
-            df_rain_elevation.columns.to_list()
+            df_location.columns.to_list()
         )
         df_bad_ground_type = PandasHelper.safe_read_csv(
             FilesConstants.BAD_GROUND_TYPE,
-            df_rain_elevation.columns.to_list()
+            df_location.columns.to_list()
         )
 
-        if len(df_rain_elevation) == len(df_found_ground_type) + len(df_bad_ground_type):
+        if len(df_location) == len(df_found_ground_type) + len(df_bad_ground_type):
             print("There is no row to process")
             break
 
         try:
             GetGroundType.get_ground_type(
-                df_rain_elevation=df_rain_elevation,
+                df_location=df_location,
                 df_bad_ground_type=df_bad_ground_type,
                 df_found_ground_type=df_found_ground_type,
-                batch_size=20
+                batch_size=200
             )
             print("Finished reading batch")
         except Exception as error:
