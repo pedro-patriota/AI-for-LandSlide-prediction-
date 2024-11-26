@@ -28,6 +28,7 @@ class DataFrameConstants:
     """
     Stores DataFrame constants
     """
+    CLUSTER = 'cluster'
     DANGER_LEVEL = 'danger_level'
     SLOPE_DEGREE = 'slope_degree'
     SLOPE_PERCENTAGE = 'slope_percentage'
