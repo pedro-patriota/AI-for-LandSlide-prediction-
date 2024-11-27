@@ -8,7 +8,6 @@ from base.pandas_constants import (
 USELESS_COLUMNS = [
     DataFrameConstants.IS_CONFIRMED,
     DataFrameConstants.LOCATION_STRATEGY,
-    DataFrameConstants.PROCESSO_NUMERO,
     DataFrameConstants.PROCESSO_OCORRENCIA,
     DataFrameConstants.SOLICITACAO_BAIRRO,
     DataFrameConstants.SOLICITACAO_DATA,
