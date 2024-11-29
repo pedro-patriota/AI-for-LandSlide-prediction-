@@ -10,8 +10,7 @@ from base.pandas_constants import (
     RainElevationConstants,
     DataFrameConstants,
     ValuesConstants,
-    PathConstants,
-    FilesConstants
+    PathConstants
 )
 from base.pandas_helper import PandasHelper
 from processing.rain_elevation.get_rain_elevation_helper import GetRainElevationHelper
@@ -68,6 +67,8 @@ class GetRainElevation:
             df_danger_level: DataFrame,
             df_bad_rain_elevation: DataFrame,
             df_found_rain_elevation: DataFrame,
+            path_found: str = PathConstants.LANDSLIDE_FOUND_RAIN_ELEVATION_PATH,
+            path_bad: str = PathConstants.LANDSLIDE_BAD_RAIN_ELEVATION_PATH,
             batch_size: int = 5
     ) -> None:
         """Update the DataFrame with rain and elevation information."""
@@ -108,20 +109,23 @@ class GetRainElevation:
         df_bad_rain_elevation = concat([df_bad_rain_elevation, df_bad_rows], ignore_index=True)
         df_found_rain_elevation = concat([df_found_rain_elevation, df_good_rows], ignore_index=True)
 
-        df_bad_rain_elevation.to_csv(PathConstants.LANDSLIDE_BAD_RAIN_ELEVATION_PATH, index=False, header=True)
-        df_found_rain_elevation.to_csv(PathConstants.LANDSLIDE_FOUND_RAIN_ELEVATION_PATH, index=False, header=True)
+        df_bad_rain_elevation.to_csv(path_bad, index=False, header=True)
+        df_found_rain_elevation.to_csv(path_found, index=False, header=True)
 
 
 if __name__ == '__main__':
     while True:
-        df_danger_level = read_csv(PathConstants.LANDSLIDE_FOUND_DANGER_LEVEL_PATH)
+        df_danger_level = read_csv(PathConstants.NO_LANDSLIDE_FOUND_DANGER_LEVEL_PATH)
+
+        path_found = PathConstants.NO_LANDSLIDE_FOUND_RAIN_ELEVATION_PATH
+        path_bad = PathConstants.NO_LANDSLIDE_BAD_RAIN_ELEVATION_PATH
 
         df_found_rain_elevation = PandasHelper.safe_read_csv(
-            PathConstants.LANDSLIDE_FOUND_RAIN_ELEVATION_PATH,
+            path_found,
             df_danger_level.columns.to_list()
         )
         df_bad_rain_elevation = PandasHelper.safe_read_csv(
-            PathConstants.LANDSLIDE_BAD_RAIN_ELEVATION_PATH,
+            path_bad,
             df_danger_level.columns.to_list()
         )
 
@@ -134,6 +138,8 @@ if __name__ == '__main__':
                 df_danger_level=df_danger_level,
                 df_bad_rain_elevation=df_bad_rain_elevation,
                 df_found_rain_elevation=df_found_rain_elevation,
+                path_found=path_found,
+                path_bad=path_bad,
                 batch_size=20
             )
             print("Finished reading batch")

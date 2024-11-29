@@ -7,7 +7,6 @@ from shapely.geometry import Point
 
 from base.pandas_constants import (
     PathConstants,
-    FilesConstants,
     DataFrameConstants, ValuesConstants, DangerLevelConstants
 )
 from base.pandas_helper import PandasHelper
@@ -40,6 +39,8 @@ class GetDangerLevel:
             df_ground_type: DataFrame,
             df_bad_danger_level: DataFrame,
             df_found_danger_level: DataFrame,
+            path_found: str = PathConstants.LANDSLIDE_FOUND_DANGER_LEVEL_PATH,
+            path_bad: str = PathConstants.LANDSLIDE_BAD_DANGER_LEVEL_PATH,
             batch_size: int = 10
     ) -> None:
         """Process batches of data to determine danger levels and update DataFrames accordingly."""
@@ -68,22 +69,19 @@ class GetDangerLevel:
         df_bad_danger_level = concat([df_bad_danger_level, df_bad_rows], ignore_index=True)
         df_found_danger_level = concat([df_found_danger_level, df_good_rows], ignore_index=True)
 
-        df_bad_danger_level.to_csv(PathConstants.BAD_DANGER_LEVEL, index=False, header=True)
-        df_found_danger_level.to_csv(PathConstants.FOUND_DANGER_LEVEL, index=False, header=True)
+        df_bad_danger_level.to_csv(path_bad, index=False, header=True)
+        df_found_danger_level.to_csv(path_found, index=False, header=True)
 
 
 if __name__ == '__main__':
     while True:
-        df_ground_type = read_csv(PathConstants.LANDSLIDE_FOUND_GROUND_AMPLITUDE_PATH)
+        df_ground_type = read_csv(PathConstants.NO_LANDSLIDE_FOUND_GROUND_AMPLITUDE_PATH)
 
-        df_found_danger_level = PandasHelper.safe_read_csv(
-            PathConstants.LANDSLIDE_FOUND_DANGER_LEVEL_PATH,
-            df_ground_type.columns.to_list()
-        )
-        df_bad_danger_level = PandasHelper.safe_read_csv(
-            PathConstants.LANDSLIDE_BAD_DANGER_LEVEL_PATH,
-            df_ground_type.columns.to_list()
-        )
+        path_found = PathConstants.NO_LANDSLIDE_FOUND_DANGER_LEVEL_PATH
+        path_bad = PathConstants.NO_LANDSLIDE_BAD_DANGER_LEVEL_PATH
+
+        df_found_danger_level = PandasHelper.safe_read_csv(path_found, df_ground_type.columns.to_list())
+        df_bad_danger_level = PandasHelper.safe_read_csv(path_bad, df_ground_type.columns.to_list())
 
         if len(df_ground_type) == len(df_found_danger_level) + len(df_bad_danger_level):
             print("There is no row to process")
@@ -94,6 +92,8 @@ if __name__ == '__main__':
                 df_ground_type=df_ground_type,
                 df_bad_danger_level=df_bad_danger_level,
                 df_found_danger_level=df_found_danger_level,
+                path_found=path_found,
+                path_bad=path_bad,
                 batch_size=1000
             )
             print("Finished reading batch")

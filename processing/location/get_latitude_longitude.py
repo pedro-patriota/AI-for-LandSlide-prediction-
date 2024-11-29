@@ -1,18 +1,19 @@
+import os
 import time
 from typing import Tuple, Optional
 
+import googlemaps
 from pandas import DataFrame, Series, read_csv, concat
 
 from base.pandas_constants import (
     DataFrameConstants,
     ProcessingConstants,
     PathConstants,
-    FilesConstants, ValuesConstants, LocationConstants
+    ValuesConstants, LocationConstants
 )
 from base.pandas_helper import PandasHelper
 from get_latitude_longitude_helper import GetLatitudeLongitudeHelper
-import os
-import googlemaps
+
 
 class GetLatitudeLongitude:
     """
@@ -86,7 +87,8 @@ class GetLatitudeLongitude:
         gmaps = googlemaps.Client(key=key)
         geocode_result = gmaps.geocode(address)
         if not geocode_result or len(geocode_result) == 0:
-            print(f"Did not found latitude and longitude for occurrence {occurrence[DataFrameConstants.PROCESSO_NUMERO]}")
+            print(
+                f"Did not found latitude and longitude for occurrence {occurrence[DataFrameConstants.PROCESSO_NUMERO]}")
             return None, None, None
 
         address_components = geocode_result[0][LocationConstants.ADDRESS_COMPONENTS]
@@ -96,7 +98,8 @@ class GetLatitudeLongitude:
                 is_in_recife = True
                 break
         if not is_in_recife:
-            print(f"Did not found latitude and longitude for occurrence {occurrence[DataFrameConstants.PROCESSO_NUMERO]}")
+            print(
+                f"Did not found latitude and longitude for occurrence {occurrence[DataFrameConstants.PROCESSO_NUMERO]}")
             return None, None, None
 
         latitude = (geocode_result[0][ProcessingConstants.GEOMETRY][LocationConstants.LOCATION][LocationConstants.LAT])

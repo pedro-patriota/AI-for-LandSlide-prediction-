@@ -7,7 +7,6 @@ from shapely.geometry import Point
 
 from base.pandas_constants import (
     PathConstants,
-    FilesConstants,
     DataFrameConstants, ValuesConstants, GroundAmplitudeConstants
 )
 from base.pandas_helper import PandasHelper
@@ -45,6 +44,8 @@ class GetGroundAmplitude:
             df_ground_type: DataFrame,
             df_bad_ground_amplitude: DataFrame,
             df_found_ground_amplitude: DataFrame,
+            path_found: str = PathConstants.LANDSLIDE_FOUND_GROUND_AMPLITUDE_PATH,
+            path_bad: str = PathConstants.LANDSLIDE_BAD_GROUND_AMPLITUDE_PATH,
             batch_size: int = 10
     ) -> None:
         """Update the DataFrame with ground amplitude information."""
@@ -90,22 +91,19 @@ class GetGroundAmplitude:
         df_bad_ground_amplitude = concat([df_bad_ground_amplitude, df_bad_rows], ignore_index=True)
         df_found_ground_amplitude = concat([df_found_ground_amplitude, df_good_rows], ignore_index=True)
 
-        df_bad_ground_amplitude.to_csv(PathConstants.BAD_GROUND_AMPLITUDE, index=False, header=True)
-        df_found_ground_amplitude.to_csv(PathConstants.FOUND_GROUND_AMPLITUDE, index=False, header=True)
+        df_bad_ground_amplitude.to_csv(path_bad, index=False, header=True)
+        df_found_ground_amplitude.to_csv(path_found, index=False, header=True)
 
 
 if __name__ == '__main__':
     while True:
-        df_ground_type = read_csv(PathConstants.LANDSLIDE_FOUND_GROUND_TYPE_PATH)
+        df_ground_type = read_csv(PathConstants.NO_LANDSLIDE_FOUND_GROUND_TYPE_PATH)
+        path_found = PathConstants.NO_LANDSLIDE_FOUND_GROUND_AMPLITUDE_PATH
+        path_bad = PathConstants.NO_LANDSLIDE_BAD_GROUND_AMPLITUDE_PATH
 
-        df_found_ground_amplitude = PandasHelper.safe_read_csv(
-            PathConstants.LANDSLIDE_FOUND_GROUND_AMPLITUDE_PATH,
-            df_ground_type.columns.to_list()
-        )
-        df_bad_ground_amplitude = PandasHelper.safe_read_csv(
-            PathConstants.LANDSLIDE_BAD_GROUND_AMPLITUDE_PATH,
-            df_ground_type.columns.to_list()
-        )
+        df_found_ground_amplitude = PandasHelper.safe_read_csv(path_found, df_ground_type.columns.to_list())
+
+        df_bad_ground_amplitude = PandasHelper.safe_read_csv(path_bad, df_ground_type.columns.to_list())
 
         if len(df_ground_type) == len(df_found_ground_amplitude) + len(df_bad_ground_amplitude):
             print("There is no row to process")
@@ -116,6 +114,8 @@ if __name__ == '__main__':
                 df_ground_type=df_ground_type,
                 df_bad_ground_amplitude=df_bad_ground_amplitude,
                 df_found_ground_amplitude=df_found_ground_amplitude,
+                path_found=path_found,
+                path_bad=path_bad,
                 batch_size=300
             )
             print("Finished reading batch")

@@ -40,6 +40,8 @@ class GetGroundType:
             df_location: DataFrame,
             df_bad_ground_type: DataFrame,
             df_found_ground_type: DataFrame,
+            path_found: str = PathConstants.LANDSLIDE_FOUND_GROUND_TYPE_PATH,
+            path_bad: str = PathConstants.LANDSLIDE_BAD_GROUND_TYPE_PATH,
             batch_size: int = 10
     ) -> None:
         """Process ground types for a batch of points."""
@@ -68,22 +70,18 @@ class GetGroundType:
         df_bad_ground_type = concat([df_bad_ground_type, df_bad_rows], ignore_index=True)
         df_found_ground_type = concat([df_found_ground_type, df_good_rows], ignore_index=True)
 
-        df_bad_ground_type.to_csv(PathConstants.BAD_GROUND_TYPE, index=False, header=True)
-        df_found_ground_type.to_csv(PathConstants.FOUND_GROUND_TYPE, index=False, header=True)
+        df_bad_ground_type.to_csv(path_bad, index=False, header=True)
+        df_found_ground_type.to_csv(path_found, index=False, header=True)
 
 
 if __name__ == '__main__':
     while True:
-        df_location = read_csv(PathConstants.LANDSLIDE_FOUND_LOCATIONS_PATH)
+        df_location = read_csv(PathConstants.NO_LANDSLIDE_FOUND_LOCATIONS_PATH)
+        path_found = PathConstants.NO_LANDSLIDE_FOUND_GROUND_TYPE_PATH
+        path_bad = PathConstants.NO_LANDSLIDE_BAD_GROUND_TYPE_PATH
 
-        df_found_ground_type = PandasHelper.safe_read_csv(
-            PathConstants.LANDSLIDE_FOUND_GROUND_TYPE_PATH,
-            df_location.columns.to_list()
-        )
-        df_bad_ground_type = PandasHelper.safe_read_csv(
-            PathConstants.LANDSLIDE_BAD_GROUND_TYPE_PATH,
-            df_location.columns.to_list()
-        )
+        df_found_ground_type = PandasHelper.safe_read_csv(path_found, df_location.columns.to_list())
+        df_bad_ground_type = PandasHelper.safe_read_csv(path_bad, df_location.columns.to_list())
 
         if len(df_location) == len(df_found_ground_type) + len(df_bad_ground_type):
             print("There is no row to process")
@@ -94,6 +92,8 @@ if __name__ == '__main__':
                 df_location=df_location,
                 df_bad_ground_type=df_bad_ground_type,
                 df_found_ground_type=df_found_ground_type,
+                path_found=path_found,
+                path_bad=path_bad,
                 batch_size=200
             )
             print("Finished reading batch")
