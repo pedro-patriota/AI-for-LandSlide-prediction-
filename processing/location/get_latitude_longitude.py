@@ -110,6 +110,8 @@ class GetLatitudeLongitude:
             df_merged: DataFrame,
             df_found_locations: DataFrame,
             df_bad_locations: DataFrame,
+            path_found: str = PathConstants.LANDSLIDE_FOUND_LOCATIONS_PATH,
+            path_bad: str = PathConstants.LANDSLIDE_BAD_LOCATIONS_PATH,
             batch_size: int = 100
     ):
         """Process occurrences to get latitude and longitude in batches."""
@@ -143,22 +145,32 @@ class GetLatitudeLongitude:
         df_bad_locations = concat([df_bad_locations, df_bad_rows], ignore_index=True)
         df_found_locations = concat([df_found_locations, df_good_rows], ignore_index=True)
 
-        df_bad_locations.to_csv(PathConstants.LANDSLIDE_BAD_LOCATIONS_PATH, index=False, header=True)
-        df_found_locations.to_csv(PathConstants.LANDSLIDE_FOUND_LOCATIONS_PATH, index=False, header=True)
+        df_bad_locations.to_csv(path_bad, index=False, header=True)
+        df_found_locations.to_csv(path_found, index=False, header=True)
 
 
 if __name__ == '__main__':
     while True:
         df_merged = read_csv(PathConstants.LANDSLIDE_MERGED_PATH)
-        df_found_locations = PandasHelper.safe_read_csv(PathConstants.LANDSLIDE_FOUND_LOCATIONS_PATH, df_merged.columns.to_list())
-        df_bad_locations = PandasHelper.safe_read_csv(PathConstants.LANDSLIDE_BAD_LOCATIONS_PATH, df_merged.columns.to_list())
+        path_found = PathConstants.LANDSLIDE_FOUND_LOCATIONS_PATH
+        path_bad = PathConstants.LANDSLIDE_BAD_LOCATIONS_PATH
+
+        df_found_locations = PandasHelper.safe_read_csv(path_found, df_merged.columns.to_list())
+        df_bad_locations = PandasHelper.safe_read_csv(path_bad, df_merged.columns.to_list())
 
         if len(df_merged) == len(df_found_locations) + len(df_bad_locations):
             print("There is no row to process")
             break
 
         try:
-            GetLatitudeLongitude.get_latitude_longitude(df_merged, df_found_locations, df_bad_locations, 50)
+            GetLatitudeLongitude.get_latitude_longitude(
+                df_merged,
+                df_found_locations,
+                df_bad_locations,
+                path_found=path_found,
+                path_bad=path_bad,
+                batch_size=50
+            )
             print("Finished reading batch")
         except Exception as error:
             print(error.__str__())
