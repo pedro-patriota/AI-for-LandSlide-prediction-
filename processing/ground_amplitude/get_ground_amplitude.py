@@ -96,14 +96,14 @@ class GetGroundAmplitude:
 
 if __name__ == '__main__':
     while True:
-        df_ground_type = read_csv(PathConstants.FOUND_GROUND_TYPE_PATH)
+        df_ground_type = read_csv(PathConstants.LANDSLIDE_FOUND_GROUND_TYPE_PATH)
 
         df_found_ground_amplitude = PandasHelper.safe_read_csv(
-            FilesConstants.FOUND_GROUND_AMPLITUDE,
+            PathConstants.LANDSLIDE_FOUND_GROUND_AMPLITUDE_PATH,
             df_ground_type.columns.to_list()
         )
         df_bad_ground_amplitude = PandasHelper.safe_read_csv(
-            FilesConstants.BAD_GROUND_AMPLITUDE,
+            PathConstants.LANDSLIDE_BAD_GROUND_AMPLITUDE_PATH,
             df_ground_type.columns.to_list()
         )
 

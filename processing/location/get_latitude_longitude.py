@@ -143,15 +143,15 @@ class GetLatitudeLongitude:
         df_bad_locations = concat([df_bad_locations, df_bad_rows], ignore_index=True)
         df_found_locations = concat([df_found_locations, df_good_rows], ignore_index=True)
 
-        df_bad_locations.to_csv(PathConstants.BAD_LOCATIONS_PATH, index=False, header=True)
+        df_bad_locations.to_csv(PathConstants.LANDSLIDE_BAD_LOCATIONS_PATH, index=False, header=True)
         df_found_locations.to_csv(PathConstants.FOUND_LOCATIONS, index=False, header=True)
 
 
 if __name__ == '__main__':
     while True:
-        df_merged = read_csv(PathConstants.MERGED_PATH)
-        df_found_locations = PandasHelper.safe_read_csv(FilesConstants.FOUND_LOCATIONS, df_merged.columns.to_list())
-        df_bad_locations = PandasHelper.safe_read_csv(FilesConstants.BAD_LOCATIONS, df_merged.columns.to_list())
+        df_merged = read_csv(PathConstants.LANDSLIDE_MERGED_PATH)
+        df_found_locations = PandasHelper.safe_read_csv(PathConstants.LANDSLIDE_FOUND_LOCATIONS_PATH, df_merged.columns.to_list())
+        df_bad_locations = PandasHelper.safe_read_csv(PathConstants.LANDSLIDE_BAD_LOCATIONS_PATH, df_merged.columns.to_list())
 
         if len(df_merged) == len(df_found_locations) + len(df_bad_locations):
             print("There is no row to process")

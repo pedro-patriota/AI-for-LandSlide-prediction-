@@ -108,20 +108,20 @@ class GetRainElevation:
         df_bad_rain_elevation = concat([df_bad_rain_elevation, df_bad_rows], ignore_index=True)
         df_found_rain_elevation = concat([df_found_rain_elevation, df_good_rows], ignore_index=True)
 
-        df_bad_rain_elevation.to_csv(PathConstants.BAD_RAIN_ELEVATION_PATH, index=False, header=True)
-        df_found_rain_elevation.to_csv(PathConstants.FOUND_RAIN_ELEVATION_PATH, index=False, header=True)
+        df_bad_rain_elevation.to_csv(PathConstants.LANDSLIDE_BAD_RAIN_ELEVATION_PATH, index=False, header=True)
+        df_found_rain_elevation.to_csv(PathConstants.LANDSLIDE_FOUND_RAIN_ELEVATION_PATH, index=False, header=True)
 
 
 if __name__ == '__main__':
     while True:
-        df_danger_level = read_csv(PathConstants.FOUND_DANGER_LEVEL_PATH)
+        df_danger_level = read_csv(PathConstants.LANDSLIDE_FOUND_DANGER_LEVEL_PATH)
 
         df_found_rain_elevation = PandasHelper.safe_read_csv(
-            FilesConstants.FOUND_RAIN_ELEVATION,
+            PathConstants.LANDSLIDE_FOUND_RAIN_ELEVATION_PATH,
             df_danger_level.columns.to_list()
         )
         df_bad_rain_elevation = PandasHelper.safe_read_csv(
-            FilesConstants.BAD_RAIN_ELEVATION,
+            PathConstants.LANDSLIDE_BAD_RAIN_ELEVATION_PATH,
             df_danger_level.columns.to_list()
         )
 

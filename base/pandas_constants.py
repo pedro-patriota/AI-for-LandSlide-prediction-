@@ -29,6 +29,7 @@ class DataFrameConstants:
     Stores DataFrame constants
     """
     CLUSTER = 'cluster'
+    DISTANCE_TO_CENTROID = 'distance_to_centroid'
     DANGER_LEVEL = 'danger_level'
     SLOPE_DEGREE = 'slope_degree'
     SLOPE_PERCENTAGE = 'slope_percentage'
@@ -96,6 +97,7 @@ class ProcessingConstants:
     GOOGLE_MAPS_API = 'google maps api'
     MAYBE_CONFIRMED = 1
     NOT_CONFIRMED = 0
+    NO_LANDSLIDE = -1
     RECIFE = 'Recife'
     RESULTS = 'results'
     GEOMETRY = 'geometry'
@@ -121,6 +123,14 @@ class ValuesConstants:
     """
     Stores values constants
     """
+    INCENDIOS = 'Incendios'
+    IMOVEIS_ALAGADOS = 'Imoveis Alagados'
+    ARVORES_EM_RISCO = 'Arvores em Risco'
+    ALAGAMENTOS = 'Alagamentos'
+    INVASAO_TERRENO = 'Invasao de Terreno de Auxilio Moradia'
+    TRANSBORDAMENTO_CANAL = 'Transbordamentos de Canais'
+    ELEVACAO_RIO = 'Elevacao do Nivel do Rio'
+    PRODUTOS_QUIMICOS = 'Produtos Quimicos Perigosos'
     DESLIZAMENTOS_DE_BARREIRAS = 'Deslizamentos de Barreiras'
     IMOVEIS_COM_DANOS = 'Imoveis com Danos/Risco'
     NAO_HA_OCORRENCIAS = 'Não há Ocorrência para essa Solicitação'
@@ -133,19 +143,40 @@ class PathConstants(FilesConstants):
     """
     Stores path constants
     """
+    LANDSLIDE_DIR = 'landslide'
+    NO_LANDSLIDE_DIR = 'no_landslide'
+    LANDSLIDE_PREFIX = 'landslide_'
+    NO_LANDSLIDE_PREFIX = 'no_landslide_'
 
-    BAD_DANGER_LEVEL_PATH = f'../danger_level/{FilesConstants.BAD_DANGER_LEVEL}'
-    BAD_GROUND_AMPLITUDE_PATH = f'../ground_amplitude/{FilesConstants.BAD_GROUND_AMPLITUDE}'
-    BAD_GROUND_TYPE_PATH = f'../ground_type/{FilesConstants.BAD_GROUND_TYPE}'
-    BAD_LOCATIONS_PATH = f'../location/{FilesConstants.BAD_LOCATIONS}'
-    BAD_RAIN_ELEVATION_PATH = f'../rain_elevation/{FilesConstants.BAD_RAIN_ELEVATION}'
+    LANDSLIDE_MERGED_PATH = f'../merge/{LANDSLIDE_DIR}/{LANDSLIDE_PREFIX}{FilesConstants.MERGED}'
+    NO_LANDSLIDE_MERGED_PATH = f'../merge/{NO_LANDSLIDE_DIR}/{NO_LANDSLIDE_PREFIX}{FilesConstants.MERGED}'
+
+    LANDSLIDE_BAD_GROUND_TYPE_PATH = f'../ground_type/{LANDSLIDE_DIR}/{LANDSLIDE_PREFIX}{FilesConstants.BAD_GROUND_TYPE}'
+    NO_LANDSLIDE_BAD_GROUND_TYPE_PATH = f'../ground_type/{NO_LANDSLIDE_DIR}/{NO_LANDSLIDE_PREFIX}{FilesConstants.BAD_GROUND_TYPE}'
+    LANDSLIDE_FOUND_GROUND_TYPE_PATH = f'../ground_type/{LANDSLIDE_DIR}/{LANDSLIDE_PREFIX}{FilesConstants.FOUND_GROUND_TYPE}'
+    NO_LANDSLIDE_FOUND_GROUND_TYPE_PATH = f'../ground_type/{NO_LANDSLIDE_DIR}/{NO_LANDSLIDE_PREFIX}{FilesConstants.FOUND_GROUND_TYPE}'
+
+    LANDSLIDE_BAD_LOCATIONS_PATH = f'../location/{LANDSLIDE_DIR}/{LANDSLIDE_PREFIX}{FilesConstants.BAD_LOCATIONS}'
+    NO_LANDSLIDE_BAD_LOCATIONS_PATH = f'../location/{NO_LANDSLIDE_DIR}/{NO_LANDSLIDE_PREFIX}{FilesConstants.BAD_LOCATIONS}'
+    LANDSLIDE_FOUND_LOCATIONS_PATH =  f'../location/{LANDSLIDE_DIR}/{LANDSLIDE_PREFIX}{FilesConstants.FOUND_LOCATIONS}'
+    NO_LANDSLIDE_FOUND_LOCATIONS_PATH = f'../location/{NO_LANDSLIDE_DIR}/{NO_LANDSLIDE_PREFIX}{FilesConstants.FOUND_LOCATIONS}'
+
+    LANDSLIDE_FOUND_GROUND_AMPLITUDE_PATH = f'../ground_amplitude/{LANDSLIDE_DIR}/{LANDSLIDE_PREFIX}{FilesConstants.FOUND_GROUND_AMPLITUDE}'
+    LANDSLIDE_BAD_GROUND_AMPLITUDE_PATH = f'../ground_amplitude/{LANDSLIDE_DIR}/{LANDSLIDE_PREFIX}{FilesConstants.BAD_GROUND_AMPLITUDE}'
+    NO_LANDSLIDE_FOUND_GROUND_AMPLITUDE_PATH = f'../ground_amplitude/{NO_LANDSLIDE_DIR}/{NO_LANDSLIDE_PREFIX}{FilesConstants.FOUND_GROUND_AMPLITUDE}'
+    NO_LANDSLIDE_BAD_GROUND_AMPLITUDE_PATH = f'../ground_amplitude/{NO_LANDSLIDE_DIR}/{NO_LANDSLIDE_PREFIX}{FilesConstants.BAD_GROUND_AMPLITUDE}'
+
+    LANDSLIDE_BAD_DANGER_LEVEL_PATH = f'../danger_level/{LANDSLIDE_DIR}/{LANDSLIDE_PREFIX}{FilesConstants.BAD_DANGER_LEVEL}'
+    LANDSLIDE_FOUND_DANGER_LEVEL_PATH = f'../danger_level/{LANDSLIDE_DIR}/{LANDSLIDE_PREFIX}{FilesConstants.FOUND_DANGER_LEVEL}'
+    NO_LANDSLIDE_BAD_DANGER_LEVEL_PATH = f'../danger_level/{NO_LANDSLIDE_DIR}/{NO_LANDSLIDE_PREFIX}{FilesConstants.BAD_DANGER_LEVEL}'
+    NO_LANDSLIDE_FOUND_DANGER_LEVEL_PATH = f'../danger_level/{NO_LANDSLIDE_DIR}/{NO_LANDSLIDE_PREFIX}{FilesConstants.FOUND_DANGER_LEVEL}'
+
+    LANDSLIDE_BAD_RAIN_ELEVATION_PATH = f'../rain_elevation/{LANDSLIDE_DIR}/{LANDSLIDE_PREFIX}{FilesConstants.BAD_RAIN_ELEVATION}'
+    LANDSLIDE_FOUND_RAIN_ELEVATION_PATH = f'../rain_elevation/{LANDSLIDE_DIR}/{LANDSLIDE_PREFIX}{FilesConstants.FOUND_RAIN_ELEVATION}'
+    NO_LANDSLIDE_BAD_RAIN_ELEVATION_PATH = f'../rain_elevation/{NO_LANDSLIDE_DIR}/{NO_LANDSLIDE_PREFIX}{FilesConstants.BAD_RAIN_ELEVATION}'
+    NO_LANDSLIDE_FOUND_RAIN_ELEVATION_PATH = f'../rain_elevation/{NO_LANDSLIDE_DIR}/{NO_LANDSLIDE_PREFIX}{FilesConstants.FOUND_RAIN_ELEVATION}'
+
     FINAL_DF_PATH = f'../../algorithm/{FilesConstants.FINAL_DF}'
-    FOUND_DANGER_LEVEL_PATH = f'../danger_level/{FilesConstants.FOUND_DANGER_LEVEL}'
-    FOUND_GROUND_AMPLITUDE_PATH = f'../ground_amplitude/{FilesConstants.FOUND_GROUND_AMPLITUDE}'
-    FOUND_GROUND_TYPE_PATH = f'../ground_type/{FilesConstants.FOUND_GROUND_TYPE}'
-    FOUND_LOCATIONS_PATH = f'../location/{FilesConstants.FOUND_LOCATIONS}'
-    FOUND_RAIN_ELEVATION_PATH = f'../rain_elevation/{FilesConstants.FOUND_RAIN_ELEVATION}'
-    MERGED_PATH = f'../merge/{FilesConstants.MERGED}'
     MOVIMENTO_MASSA_PATH = f'../danger_level/deslizamento_de_massas/{FilesConstants.MOVIMENTO_MASSA}'
     PADRAO_DE_RELEVO_PATH = f'../ground_amplitude/ground_amplitude_data/{FilesConstants.PADRAO_DE_RELEVO}'
 

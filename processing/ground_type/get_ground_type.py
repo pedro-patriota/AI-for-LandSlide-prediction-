@@ -74,14 +74,14 @@ class GetGroundType:
 
 if __name__ == '__main__':
     while True:
-        df_location = read_csv(PathConstants.FOUND_LOCATIONS_PATH)
+        df_location = read_csv(PathConstants.LANDSLIDE_FOUND_LOCATIONS_PATH)
 
         df_found_ground_type = PandasHelper.safe_read_csv(
-            FilesConstants.FOUND_GROUND_TYPE,
+            PathConstants.LANDSLIDE_FOUND_GROUND_TYPE_PATH,
             df_location.columns.to_list()
         )
         df_bad_ground_type = PandasHelper.safe_read_csv(
-            FilesConstants.BAD_GROUND_TYPE,
+            PathConstants.LANDSLIDE_BAD_GROUND_TYPE_PATH,
             df_location.columns.to_list()
         )
 

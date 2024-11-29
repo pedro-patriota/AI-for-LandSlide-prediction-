@@ -34,5 +34,5 @@ class MergeTables:
 
 
 if __name__ == '__main__':
-    df_final = read_csv(PathConstants.FOUND_RAIN_ELEVATION_PATH)
+    df_final = read_csv(PathConstants.LANDSLIDE_FOUND_RAIN_ELEVATION_PATH)
     MergeTables.filter_data_for_algorithm(df_final)

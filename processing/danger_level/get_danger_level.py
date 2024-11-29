@@ -74,14 +74,14 @@ class GetDangerLevel:
 
 if __name__ == '__main__':
     while True:
-        df_ground_type = read_csv(PathConstants.FOUND_GROUND_AMPLITUDE_PATH)
+        df_ground_type = read_csv(PathConstants.LANDSLIDE_FOUND_GROUND_AMPLITUDE_PATH)
 
         df_found_danger_level = PandasHelper.safe_read_csv(
-            FilesConstants.FOUND_DANGER_LEVEL,
+            PathConstants.LANDSLIDE_FOUND_DANGER_LEVEL_PATH,
             df_ground_type.columns.to_list()
         )
         df_bad_danger_level = PandasHelper.safe_read_csv(
-            FilesConstants.BAD_DANGER_LEVEL,
+            PathConstants.LANDSLIDE_BAD_DANGER_LEVEL_PATH,
             df_ground_type.columns.to_list()
         )
 

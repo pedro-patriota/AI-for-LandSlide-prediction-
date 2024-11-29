@@ -18,7 +18,7 @@ class MergeTables:
     Merges occurrence table with occurrences type table
     """
 
-    DESLIZAMENTO_KEYWORDS = [
+    DESLIZAMENTO_DE_BARREIRAS_KEYWORDS = [
         r'\bdeslizamento\b',
         r'\bbarreira\b',
         r'\bdeslizamento de barreira\b',
@@ -31,6 +31,17 @@ class MergeTables:
         r'\bcolapso\b',
     ]
 
+    FIELDS_NOT_RELATED_TO_LANDSLIDES = {
+        ValuesConstants.ALAGAMENTOS,
+        ValuesConstants.ARVORES_EM_RISCO,
+        ValuesConstants.IMOVEIS_ALAGADOS,
+        ValuesConstants.PRODUTOS_QUIMICOS,
+        ValuesConstants.INCENDIOS,
+        ValuesConstants.INVASAO_TERRENO,
+        ValuesConstants.TRANSBORDAMENTO_CANAL,
+        ValuesConstants.ELEVACAO_RIO
+    }
+
     @staticmethod
     def is_related_to_deslizamento(description: str) -> bool:
         """
@@ -38,7 +49,7 @@ class MergeTables:
         """
         description_lower = description.lower()
 
-        for pattern in MergeTables.DESLIZAMENTO_KEYWORDS:
+        for pattern in MergeTables.DESLIZAMENTO_DE_BARREIRAS_KEYWORDS:
             if re.search(pattern, description_lower):
                 return True
         return False
@@ -49,6 +60,9 @@ class MergeTables:
             return ProcessingConstants.CONFIRMED
         elif process == ValuesConstants.IMOVEIS_COM_DANOS and MergeTables.is_related_to_deslizamento(description):
             return ProcessingConstants.MAYBE_CONFIRMED
+        elif (process in MergeTables.FIELDS_NOT_RELATED_TO_LANDSLIDES
+              and not MergeTables.is_related_to_deslizamento(description)):
+            return ProcessingConstants.NO_LANDSLIDE
         else:
             return ProcessingConstants.NOT_CONFIRMED
 
@@ -67,8 +81,13 @@ class MergeTables:
         df_merged = merge(df_occurrences, df_types)
         df_unique = df_merged.drop_duplicates(subset=[DataFrameConstants.PROCESSO_NUMERO])
         df_filtered = MergeTables.filter_confirmed_occurrences(df_unique)
-        df_final = df_filtered[df_filtered[DataFrameConstants.IS_CONFIRMED] != ProcessingConstants.NOT_CONFIRMED]
-        df_final.to_csv(PathConstants.MERGED_PATH, index=False, header=True)
+        df_final = df_filtered[
+            (df_filtered[DataFrameConstants.IS_CONFIRMED] == ProcessingConstants.CONFIRMED) |
+            (df_filtered[DataFrameConstants.IS_CONFIRMED] == ProcessingConstants.MAYBE_CONFIRMED)
+            ]
+        df_no_landslide = df_filtered[df_filtered[DataFrameConstants.IS_CONFIRMED] == ProcessingConstants.NO_LANDSLIDE]
+        df_final.to_csv(PathConstants.LANDSLIDE_MERGED_PATH, index=False, header=True)
+        df_no_landslide.to_csv(PathConstants.NO_LANDSLIDE_MERGED_PATH, index=False, header=True)
 
 
 if __name__ == '__main__':
