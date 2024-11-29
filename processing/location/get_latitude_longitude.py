@@ -151,9 +151,9 @@ class GetLatitudeLongitude:
 
 if __name__ == '__main__':
     while True:
-        df_merged = read_csv(PathConstants.LANDSLIDE_MERGED_PATH)
-        path_found = PathConstants.LANDSLIDE_FOUND_LOCATIONS_PATH
-        path_bad = PathConstants.LANDSLIDE_BAD_LOCATIONS_PATH
+        df_merged = read_csv(PathConstants.NO_LANDSLIDE_MERGED_PATH)
+        path_found = PathConstants.NO_LANDSLIDE_FOUND_LOCATIONS_PATH
+        path_bad = PathConstants.NO_LANDSLIDE_BAD_LOCATIONS_PATH
 
         df_found_locations = PandasHelper.safe_read_csv(path_found, df_merged.columns.to_list())
         df_bad_locations = PandasHelper.safe_read_csv(path_bad, df_merged.columns.to_list())

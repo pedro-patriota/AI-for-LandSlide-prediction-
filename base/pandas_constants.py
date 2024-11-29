@@ -71,8 +71,8 @@ class LocationConstants:
     ADDRESS_COMPONENTS = 'address_components'
     LONG_NAME = 'long_name'
     LOCATION = 'location'
-    LAT = 'LAT'
-    LNG = 'LNG'
+    LAT = 'lat'
+    LNG = 'lng'
 
 class RainElevationConstants:
     """
