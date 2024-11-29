@@ -144,7 +144,7 @@ class GetLatitudeLongitude:
         df_found_locations = concat([df_found_locations, df_good_rows], ignore_index=True)
 
         df_bad_locations.to_csv(PathConstants.LANDSLIDE_BAD_LOCATIONS_PATH, index=False, header=True)
-        df_found_locations.to_csv(PathConstants.FOUND_LOCATIONS, index=False, header=True)
+        df_found_locations.to_csv(PathConstants.LANDSLIDE_FOUND_LOCATIONS_PATH, index=False, header=True)
 
 
 if __name__ == '__main__':
