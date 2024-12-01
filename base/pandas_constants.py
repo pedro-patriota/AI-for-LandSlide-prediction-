@@ -74,6 +74,7 @@ class LocationConstants:
     LAT = 'lat'
     LNG = 'lng'
 
+
 class RainElevationConstants:
     """
     Stores rain and elevation constants
@@ -102,6 +103,7 @@ class ProcessingConstants:
     RESULTS = 'results'
     GEOMETRY = 'geometry'
 
+
 class DangerLevelConstants(ProcessingConstants):
     """
     Stores danger level constants
@@ -118,6 +120,7 @@ class GroundAmplitudeConstants(ProcessingConstants):
     AMPLITUDE = 'AMPLITUDE_'
     DECL_GRAU = 'DECL_GRAU'
     DECL_PER = 'DECL_PER'
+
 
 class ValuesConstants:
     """
@@ -158,7 +161,7 @@ class PathConstants(FilesConstants):
 
     LANDSLIDE_BAD_LOCATIONS_PATH = f'../location/{LANDSLIDE_DIR}/{LANDSLIDE_PREFIX}{FilesConstants.BAD_LOCATIONS}'
     NO_LANDSLIDE_BAD_LOCATIONS_PATH = f'../location/{NO_LANDSLIDE_DIR}/{NO_LANDSLIDE_PREFIX}{FilesConstants.BAD_LOCATIONS}'
-    LANDSLIDE_FOUND_LOCATIONS_PATH =  f'../location/{LANDSLIDE_DIR}/{LANDSLIDE_PREFIX}{FilesConstants.FOUND_LOCATIONS}'
+    LANDSLIDE_FOUND_LOCATIONS_PATH = f'../location/{LANDSLIDE_DIR}/{LANDSLIDE_PREFIX}{FilesConstants.FOUND_LOCATIONS}'
     NO_LANDSLIDE_FOUND_LOCATIONS_PATH = f'../location/{NO_LANDSLIDE_DIR}/{NO_LANDSLIDE_PREFIX}{FilesConstants.FOUND_LOCATIONS}'
 
     LANDSLIDE_FOUND_GROUND_AMPLITUDE_PATH = f'../ground_amplitude/{LANDSLIDE_DIR}/{LANDSLIDE_PREFIX}{FilesConstants.FOUND_GROUND_AMPLITUDE}'
@@ -177,13 +180,14 @@ class PathConstants(FilesConstants):
     NO_LANDSLIDE_FOUND_RAIN_ELEVATION_PATH = f'../rain_elevation/{NO_LANDSLIDE_DIR}/{NO_LANDSLIDE_PREFIX}{FilesConstants.FOUND_RAIN_ELEVATION}'
 
     LANDSLIDE_FINAL_DF_PATH = f'../../algorithm/{LANDSLIDE_PREFIX}{FilesConstants.FINAL_DF}'
-    NO_LANDSLIDE_FINAL_DF_PATH  =  f'../../algorithm/{NO_LANDSLIDE_PREFIX}{FilesConstants.FINAL_DF}'
+    NO_LANDSLIDE_FINAL_DF_PATH = f'../../algorithm/{NO_LANDSLIDE_PREFIX}{FilesConstants.FINAL_DF}'
     MOVIMENTO_MASSA_PATH = f'../danger_level/deslizamento_de_massas/{FilesConstants.MOVIMENTO_MASSA}'
     PADRAO_DE_RELEVO_PATH = f'../ground_amplitude/ground_amplitude_data/{FilesConstants.PADRAO_DE_RELEVO}'
 
 
-class AlgorithmConstants:
+class AlgorithmConstants(PathConstants):
     """
     Stores algorithm constants
     """
-    FINAL_DF_PATH = f'../{FilesConstants.FINAL_DF}'
+    LANDSLIDE_FINAL_DF_PATH = f'../{PathConstants.LANDSLIDE_PREFIX}{FilesConstants.FINAL_DF}'
+    NO_LANDSLIDE_FINAL_DF_PATH = f'../{PathConstants.NO_LANDSLIDE_PREFIX}{FilesConstants.FINAL_DF}'
