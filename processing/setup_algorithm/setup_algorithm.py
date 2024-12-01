@@ -25,14 +25,14 @@ class MergeTables:
     """
 
     @staticmethod
-    def filter_data_for_algorithm(df_final: DataFrame) -> None:
+    def filter_data_for_algorithm(df_final: DataFrame, path_found: str = PathConstants.LANDSLIDE_FINAL_DF_PATH) -> None:
         """Filters data to algorithm analysis"""
         df_final.dropna(inplace=True)
         df_final = df_final.drop(USELESS_COLUMNS, axis=1)
-        df_final.to_csv(PathConstants.FINAL_DF_PATH, index=False, header=True)
+        df_final.to_csv(path_found, index=False, header=True)
         print("Finished filtering data for algorithm analysis")
 
 
 if __name__ == '__main__':
-    df_final = read_csv(PathConstants.LANDSLIDE_FOUND_RAIN_ELEVATION_PATH)
-    MergeTables.filter_data_for_algorithm(df_final)
+    df_final = read_csv(PathConstants.NO_LANDSLIDE_FOUND_RAIN_ELEVATION_PATH)
+    MergeTables.filter_data_for_algorithm(df_final, PathConstants.NO_LANDSLIDE_FINAL_DF_PATH)

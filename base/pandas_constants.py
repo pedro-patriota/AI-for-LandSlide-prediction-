@@ -176,7 +176,8 @@ class PathConstants(FilesConstants):
     NO_LANDSLIDE_BAD_RAIN_ELEVATION_PATH = f'../rain_elevation/{NO_LANDSLIDE_DIR}/{NO_LANDSLIDE_PREFIX}{FilesConstants.BAD_RAIN_ELEVATION}'
     NO_LANDSLIDE_FOUND_RAIN_ELEVATION_PATH = f'../rain_elevation/{NO_LANDSLIDE_DIR}/{NO_LANDSLIDE_PREFIX}{FilesConstants.FOUND_RAIN_ELEVATION}'
 
-    FINAL_DF_PATH = f'../../algorithm/{FilesConstants.FINAL_DF}'
+    LANDSLIDE_FINAL_DF_PATH = f'../../algorithm/{LANDSLIDE_PREFIX}{FilesConstants.FINAL_DF}'
+    NO_LANDSLIDE_FINAL_DF_PATH  =  f'../../algorithm/{NO_LANDSLIDE_PREFIX}{FilesConstants.FINAL_DF}'
     MOVIMENTO_MASSA_PATH = f'../danger_level/deslizamento_de_massas/{FilesConstants.MOVIMENTO_MASSA}'
     PADRAO_DE_RELEVO_PATH = f'../ground_amplitude/ground_amplitude_data/{FilesConstants.PADRAO_DE_RELEVO}'
 
