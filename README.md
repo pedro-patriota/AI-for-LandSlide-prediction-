@@ -1,4 +1,4 @@
-# Project Name
+# GeoSafe
 
 ## Description
 GeoSafe is project which aims to predict landslides occurrences in urban areas of Recife, Brazil. This is done by analyzing emergency calls data together with climate and geological data. We use clustering algorithms to map different patterns of landslides and measure how close a point in time is to a pattern.
